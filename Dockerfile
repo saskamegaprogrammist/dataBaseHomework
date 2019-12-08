@@ -5,7 +5,7 @@ LABEL author="Alex Spiridonova"
 ENV DEBIAN_FRONTEND=noninteractive
 
 # updating packages
-RUN apt-get -y update
+RUN apt-get update
 
 #installing postgresql
 ENV PGVER 10
@@ -28,8 +28,6 @@ RUN /etc/init.d/postgresql start &&\
 
 # Adjust PostgreSQL configuration so that remote connections to the
 # database are possible.
-RUN rm -rf /etc/postgresql/$PGVER/main/pg_hba.conf
-RUN rm -rf /etc/postgresql/$PGVER/main/postgresql.conf
 
 RUN echo "local all postgres peer" >> /etc/postgresql/$PGVER/main/pg_hba.conf
 RUN echo "local all docker md5" >> /etc/postgresql/$PGVER/main/pg_hba.conf
