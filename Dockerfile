@@ -63,12 +63,15 @@ RUN mkdir -p $HOME/go_test/{src,pkg,bin}
 
 
 #setting environment variable
-ENV GOPATH $HOME/go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-ADD ./ $GOPATH/src/github.com/saskamegaprogrammist/dataBaseHomework/
-RUN go install github.com/saskamegaprogrammist/dataBaseHomework/
 
-WORKDIR ${GOPATH}/src/github.com/saskamegaprogrammist/dataBaseHomework/
+ENV GOPATH=$HOME/go
+ENV PATH=$PATH:/usr/local/go/bin:$GOPATH/bin
+
+RUN mkdir -p src
+COPY ./ src/github.com/saskamegaprogrammist/dataBaseHomework
+WORKDIR /src/github.com/saskamegaprogrammist/dataBaseHomework
+RUN go get -d -v
+RUN go build
 
 # Expose server port
 EXPOSE 5000
