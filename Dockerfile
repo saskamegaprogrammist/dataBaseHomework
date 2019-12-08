@@ -75,4 +75,4 @@ RUN go build
 EXPOSE 5000
 
 USER postgres
-CMD  service postgresql start && dataBaseHomework
+CMD  service postgresql start && ./dataBaseHomework
