@@ -1,29 +1,30 @@
 package utils
 
 import (
-	"context"
 	"fmt"
-	"github.com/jackc/pgx/pgxpool"
-	_ "github.com/jackc/pgx/pgxpool"
+	"github.com/jackc/pgx"
 	"io/ioutil"
 	"log"
 )
 
-var dataBasePool *pgxpool.Pool
+var dataBasePool *pgx.ConnPool
 
-func createAddress(user, password, host, name string, maxConn int) string {
-	return  fmt.Sprintf("user=%s password=%s host=%s port=5432 dbname=%s pool_max_conns=%d",
-	user, password, host, name, maxConn)
+func createAddress(user, password, host, name string) string {
+	return  fmt.Sprintf("user=%s password=%s host=%s port=5432 dbname=%s",
+	user, password, host, name)
 }
 
 func CreateDataBaseConnection(user, password, host, name string, maxConn int) {
-	dataBaseConfig := createAddress(user, password, host, name, maxConn)
-	config, err := pgxpool.ParseConfig(dataBaseConfig)
+	dataBaseConfig := createAddress(user, password, host, name)
+	connectionConfig, err := pgx.ParseConnectionString(dataBaseConfig)
 	if err != nil {
 		log.Println(err);
 		return
 	}
-	dataBasePool, err = pgxpool.ConnectConfig(context.Background(), config)
+	dataBasePool, err = pgx.NewConnPool(pgx.ConnPoolConfig{
+		ConnConfig: connectionConfig,
+		MaxConnections: maxConn,
+	})
 	if err != nil {
 		log.Println(err);
 		return
@@ -31,11 +32,11 @@ func CreateDataBaseConnection(user, password, host, name string, maxConn int) {
 }
 
 func InitDataBase() {
-	initScript, err := ioutil.ReadFile("sql_sripts/database_creation.sql")
+	initScript, err := ioutil.ReadFile("./sql_scripts/database_creation.sql")
 	if err != nil {
 		log.Println(err)
 	}
-	_, err = dataBasePool.Exec(context.Background(), string(initScript));
+	_, err = dataBasePool.Exec(string(initScript))
 	if err != nil {
 		log.Println(err)
 	}
