@@ -2,6 +2,8 @@ FROM ubuntu:18.04
 
 LABEL author="Alex Spiridonova"
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 # updating packages
 RUN apt-get -y update
 
