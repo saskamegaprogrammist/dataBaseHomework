@@ -85,14 +85,14 @@ func (user *User) GetUser(userNickname string) error {
 }
 
 func (user *User) UpdateUser() (error, int) {
-	fmt.Println(user)
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
 		log.Println(err)
 	}
+	var userExistsNickname User
 	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
-	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
+	err = rows.Scan(&userExistsNickname.Id, &userExistsNickname.Nickname, &userExistsNickname.Email, &userExistsNickname.Fullname, &userExistsNickname.About)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -101,18 +101,14 @@ func (user *User) UpdateUser() (error, int) {
 		}
 		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 1
 	}
-	a, err := transaction.Exec("UPDATE forum_user SET (email) = ('sdfsd@gmail.com') WHERE nickname = $1;",  user.Nickname, user.Email)
-	fmt.Println(a)
-	rows = transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
-	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
-	fmt.Println(user)
+	_, err = transaction.Exec("UPDATE forum_user SET (email, fullname, about) = ($2, $3, $4) WHERE nickname = $1;",  user.Nickname, user.Email, user.Fullname, user.About)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
 		}
-		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 2
+		return fmt.Errorf("email exists %s", user.Email), 2
 	}
 	err = transaction.Commit()
 	if err != nil {

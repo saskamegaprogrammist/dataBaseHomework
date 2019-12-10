@@ -43,7 +43,7 @@ func CreateUser(writer http.ResponseWriter, req *http.Request) {
 
 func UpdateUser (writer http.ResponseWriter, req *http.Request) {
 	var newUser models.User
-	userNickname := string(mux.Vars(req)["nickname"])
+	userNickname := mux.Vars(req)["nickname"]
 	newUser.Nickname = userNickname
 	err := json.NewDecoder(req.Body).Decode(&newUser)
 	if err != nil {
@@ -60,6 +60,7 @@ func UpdateUser (writer http.ResponseWriter, req *http.Request) {
 		case 2:
 			utils.CreateAnswer(writer, 409, models.CreateError(err.Error()))
 		}
+		return
 	}
 	utils.CreateAnswer(writer, 200, newUser)
 }
