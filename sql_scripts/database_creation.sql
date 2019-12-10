@@ -13,6 +13,33 @@ CREATE TABLE forum_user (
     CONSTRAINT valid_nickname CHECK (nickname ~* '^[A-Za-z0-9_.]+$')
 );
 
+CREATE UNIQUE INDEX forum_user_nickname_idx ON forum_user (nickname);
+CREATE UNIQUE INDEX forum_user_email_idx ON forum_user (email);
+
+
+CREATE OR REPLACE FUNCTION check_email() RETURNS TRIGGER
+LANGUAGE  plpgsql
+AS $check_forum_user_email$
+BEGIN
+    IF (OLD.email != NEW.email) THEN
+        BEGIN
+            IF EXISTS(
+                SELECT FROM forum_user
+                WHERE email = NEW.email) THEN
+                RAISE EXCEPTION 'Cannot update, email exists';
+            END IF;
+        END;
+    END IF;
+    RETURN NEW;
+END
+$check_forum_user_email$;
+
+
+CREATE TRIGGER check_forum_user_email
+    BEFORE UPDATE ON forum_user
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_email();
+
 
 CREATE TABLE forum (
     id SERIAL NOT NULL PRIMARY KEY,

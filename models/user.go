@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
 )
@@ -41,7 +42,7 @@ func (user *User) CreateUser() ([]User, error) {
 		usersExists = append(usersExists, userExistsEmail)
 	}
 	if len(usersExists) > 0 {
-		err = transaction.Commit()
+		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -58,4 +59,64 @@ func (user *User) CreateUser() ([]User, error) {
 		log.Fatalln(err)
 	}
 	return nil, nil
+}
+
+func (user *User) GetUser(userNickname string) error {
+	dataBase := utils.GetDataBase()
+	transaction, err := dataBase.Begin()
+	if err != nil {
+		log.Println(err)
+	}
+	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", userNickname)
+	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return fmt.Errorf("can't find user with nickname %s", userNickname)
+	}
+	err = transaction.Commit()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return nil
+}
+
+func (user *User) UpdateUser() (error, int) {
+	fmt.Println(user)
+	dataBase := utils.GetDataBase()
+	transaction, err := dataBase.Begin()
+	if err != nil {
+		log.Println(err)
+	}
+	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
+	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 1
+	}
+	a, err := transaction.Exec("UPDATE forum_user SET (email) = ('sdfsd@gmail.com') WHERE nickname = $1;",  user.Nickname, user.Email)
+	fmt.Println(a)
+	rows = transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
+	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
+	fmt.Println(user)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 2
+	}
+	err = transaction.Commit()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return nil, 0
 }

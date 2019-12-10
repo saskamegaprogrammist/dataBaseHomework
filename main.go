@@ -15,9 +15,9 @@ func main() {
 	utils.InitDataBase();
 
 	r := mux.NewRouter()
-	//r.HandleFunc("/api/user/{nickname}/profile", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/api/user/{nickname}/create", handlers.CreateUser).Methods("POST")
-	//r.HandleFunc("/api/user/{nickname}/profile", handlers.UpdateUser).Methods("POST")
+	r.HandleFunc("/api/user/{nickname}/profile", handlers.GetUser).Methods("GET")
+	r.HandleFunc("/api/user/{nickname}/profile", handlers.UpdateUser).Methods("POST")
 	//
 	//r.HandleFunc("/api/forum/create", handlers.CreateForum).Methods("POST")
 	//r.HandleFunc("/api/forum/{slug}/details", handlers.GetForum).Methods("GET")
