@@ -13,9 +13,7 @@ type User struct {
 	Fullname string `json:"fullname"`
 	About string `json:"about"`
 }
-type Exists struct {
-	Exists bool
-}
+
 func (user *User) CreateUser() ([]User, error) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
@@ -52,7 +50,12 @@ func (user *User) CreateUser() ([]User, error) {
 		user.Nickname, user.Email, user.Fullname, user.About)
 	err = rows.Scan(&user.Id)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return nil, err
 	}
 	err = transaction.Commit()
 	if err != nil {
@@ -66,6 +69,11 @@ func (user *User) GetUser(userNickname string) error {
 	transaction, err := dataBase.Begin()
 	if err != nil {
 		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return err
 	}
 	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", userNickname)
 	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
@@ -79,7 +87,12 @@ func (user *User) GetUser(userNickname string) error {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return err
 	}
 	return nil
 }

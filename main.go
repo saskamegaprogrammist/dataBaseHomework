@@ -12,16 +12,17 @@ import (
 func main() {
 	//utils.CreateDataBaseConnection("docker", "docker", "localhost", "docker", 20);
 	utils.CreateDataBaseConnection("postgres", "1", "localhost", "project_techno_real", 20);
-	utils.InitDataBase();
+	//utils.InitDataBase();
 
 	r := mux.NewRouter()
 	r.HandleFunc("/api/user/{nickname}/create", handlers.CreateUser).Methods("POST")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.UpdateUser).Methods("POST")
-	//
-	//r.HandleFunc("/api/forum/create", handlers.CreateForum).Methods("POST")
+
+	r.HandleFunc("/api/forum/create", handlers.CreateForum).Methods("POST")
+	r.HandleFunc("/api/forum/{slug}/create", handlers.CreateThread).Methods("POST")
+
 	//r.HandleFunc("/api/forum/{slug}/details", handlers.GetForum).Methods("GET")
-	//r.HandleFunc("/api/forum/{slug}/create", handlers.CreateThread).Methods("POST")
 	//r.HandleFunc("/api/forum/{slug}/threads", handlers.GetThreadsByForum).Methods("GET")
 	//r.HandleFunc("/api/forum/{slug}/users", handlers.GetForumUsers).Methods("GET")
 	//

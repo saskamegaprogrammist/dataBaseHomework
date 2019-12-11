@@ -44,6 +44,7 @@ CREATE TRIGGER check_forum_user_email
 CREATE TABLE forum (
     id SERIAL NOT NULL PRIMARY KEY,
     slug varchar(200) NOT NULL UNIQUE,
+    title varchar(200) NOT NULL,
     posts int DEFAULT 0,
     threads int DEFAULT 0,
     userid int NOT NULL,
@@ -51,6 +52,8 @@ CREATE TABLE forum (
     CONSTRAINT valid_slug CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 
 );
+
+CREATE UNIQUE INDEX forum_slug_idx ON forum (slug);
 
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
@@ -64,9 +67,26 @@ CREATE TABLE thread (
     FOREIGN KEY (userid) REFERENCES forum_user (id),
     FOREIGN KEY (forumid) REFERENCES forum (id),
     CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
-
-
 );
+
+CREATE UNIQUE INDEX thread_createdtitle_idx ON thread (created, title);
+
+CREATE OR REPLACE FUNCTION add_thread() RETURNS TRIGGER
+LANGUAGE  plpgsql
+AS $add_forum_thread$
+BEGIN
+    UPDATE forum
+        SET threads = threads + 1
+        WHERE forum.id = NEW.forumid;
+    RETURN NEW;
+END
+$add_forum_thread$;
+
+
+CREATE TRIGGER add_forum_thread
+    AFTER INSERT ON thread
+    FOR EACH ROW
+    EXECUTE PROCEDURE add_thread();
 
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
