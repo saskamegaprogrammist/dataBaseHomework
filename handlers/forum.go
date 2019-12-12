@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/saskamegaprogrammist/dataBaseHomework/models"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
@@ -27,4 +28,43 @@ func CreateForum(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 	utils.CreateAnswer(writer, 201, newForum)
+}
+
+func GetForum(writer http.ResponseWriter, req *http.Request) {
+	var foundForum models.Forum
+	forumSlug := mux.Vars(req)["slug"]
+	err := foundForum.GetForum(forumSlug)
+	if err != nil {
+		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
+		return
+	}
+	utils.CreateAnswer(writer, 200, foundForum)
+}
+
+func GetThreadsByForum (writer http.ResponseWriter, req *http.Request) {
+	var searchParams utils.SearchParams
+	forumSlug := mux.Vars(req)["slug"]
+	query := req.URL.Query()
+	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"))
+	threads, err := models.GetThreadsByForum(searchParams, forumSlug)
+	if err != nil {
+		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
+		return
+	}
+	utils.CreateAnswer(writer, 200, threads)
+
+}
+
+func GetUsersByForum (writer http.ResponseWriter, req *http.Request) {
+	var searchParams utils.SearchParams
+	forumSlug := mux.Vars(req)["slug"]
+	query := req.URL.Query()
+	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"))
+	users, err := models.GetUsersByForum(searchParams, forumSlug)
+	if err != nil {
+		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
+		return
+	}
+	utils.CreateAnswer(writer, 200, users)
+
 }

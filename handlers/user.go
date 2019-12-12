@@ -28,6 +28,8 @@ func CreateUser(writer http.ResponseWriter, req *http.Request) {
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
+	userNickname := mux.Vars(req)["nickname"]
+	newUser.Nickname = userNickname
 	usersExisting, err := newUser.CreateUser()
 	if err != nil {
 		log.Println(err)

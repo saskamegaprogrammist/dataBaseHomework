@@ -53,12 +53,12 @@ CREATE TABLE forum (
 
 );
 
-CREATE UNIQUE INDEX forum_slug_idx ON forum (slug);
+CREATE INDEX forum_slug_idx ON forum (slug);
 
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
     slug varchar(200) NOT NULL UNIQUE,
-    created timestamp,
+    created timestamp DEFAULT '2017-01-01 00:00:00.000000',
     title varchar(100) NOT NULL,
     message text NOT NULL,
     votes int DEFAULT 0,
@@ -88,6 +88,15 @@ CREATE TRIGGER add_forum_thread
     FOR EACH ROW
     EXECUTE PROCEDURE add_thread();
 
+CREATE INDEX thread_forumid_idx ON thread (forumid);
+
+DROP VIEW IF EXISTS thread_full_view ;
+
+CREATE VIEW thread_full_view  AS
+    SELECT id, slug, created, title, message, votes, user_forum, forum FROM thread
+                 JOIN (SELECT nickname as user_forum, id as uid FROM forum_user) as user_t ON user_t.uid = thread.userid
+    JOIN (SELECT slug as forum, id as fid FROM forum) as forum_t ON forum_t.fid = thread.forumid;
+
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
     message text NOT NULL,
@@ -101,3 +110,44 @@ CREATE TABLE post (
     FOREIGN KEY (forumid) REFERENCES forum (id),
     FOREIGN KEY (threadid) REFERENCES thread (id)
 );
+
+CREATE INDEX post_forumid_idx ON post (forumid);
+
+CREATE OR REPLACE FUNCTION add_post() RETURNS TRIGGER
+LANGUAGE  plpgsql
+AS $add_thread_post$
+BEGIN
+    UPDATE forum
+        SET posts = posts + 1
+        WHERE forum.id = NEW.forumid;
+    RETURN NEW;
+END
+$add_thread_post$;
+
+
+CREATE TRIGGER add_thread_post
+    AFTER INSERT ON post
+    FOR EACH ROW
+    EXECUTE PROCEDURE add_post();
+
+CREATE OR REPLACE FUNCTION check_parent() RETURNS TRIGGER
+LANGUAGE  plpgsql
+AS $check_post_parent$
+BEGIN
+    IF (NEW.parent <> 0) THEN
+    BEGIN
+    IF NOT EXISTS(
+        SELECT FROM POST
+        WHERE id = NEW.parent AND threadid = NEW.threadid) THEN
+        RAISE EXCEPTION 'Cannot insert post, parent doesnot exist';
+    END IF;
+    END;
+    END IF;
+    RETURN NEW;
+END
+$check_post_parent$;
+
+CREATE TRIGGER check_post_parent
+    BEFORE INSERT OR UPDATE ON post
+    FOR EACH ROW
+    EXECUTE PROCEDURE check_parent();

@@ -2,8 +2,10 @@ package models
 
 import (
 	"fmt"
+	"github.com/jackc/pgx"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
+	"strconv"
 )
 
 type User struct {
@@ -103,9 +105,9 @@ func (user *User) UpdateUser() (error, int) {
 	if err != nil {
 		log.Println(err)
 	}
-	var userExistsNickname User
-	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
-	err = rows.Scan(&userExistsNickname.Id, &userExistsNickname.Nickname, &userExistsNickname.Email, &userExistsNickname.Fullname, &userExistsNickname.About)
+	var userExistsId int32
+	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", user.Nickname)
+	err = rows.Scan(&userExistsId)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -128,4 +130,106 @@ func (user *User) UpdateUser() (error, int) {
 		log.Fatalln(err)
 	}
 	return nil, 0
+}
+
+func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error) {
+	var usersFound []User
+	dataBase := utils.GetDataBase()
+	transaction, err := dataBase.Begin()
+	if err != nil {
+		log.Println(err)
+		errRollback := transaction.Rollback()
+		if err != nil {
+			log.Fatalln(errRollback)
+		}
+		return usersFound, err
+	}
+	var forumId int32
+	row := transaction.QueryRow("SELECT id FROM forum WHERE slug = $1", forumSlug)
+	err = row.Scan(&forumId)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return usersFound, fmt.Errorf("can't find forum with slug %s", forumSlug)
+	}
+
+	sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
+					"JOIN (SELECT COALESCE(p_userid, t_userid) as merge_id FROM ( " +
+							"SELECT DISTINCT userid as p_userid FROM post WHERE forumid = $1) as p " +
+							"FULL OUTER JOIN ( " +
+								"SELECT DISTINCT userid as t_userid  FROM thread WHERE forumid = $1) " +
+							"as t ON p.p_userid = t.t_userid) " +
+					"as u ON u.merge_id = forum_user.id"
+	var rows *pgx.Rows
+
+	if params.Decs {
+		if params.Limit != -1 {
+			if params.Since != "" {
+				since, _ := strconv.Atoi(params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" DESC LIMIT $3", forumId, since, params.Limit)
+			} else {
+				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" DESC LIMIT $2", forumId, params.Limit)
+			}
+		} else {
+			if params.Since != "" {
+				since, _ := strconv.Atoi(params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" DESC", forumId, since)
+			} else {
+				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" DESC", forumId)
+			}
+		}
+	} else {
+		if params.Limit != -1 {
+			if params.Since != "" {
+				since, _ := strconv.Atoi(params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" LIMIT $3", forumId, since, params.Limit)
+			} else {
+				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" LIMIT $2", forumId, params.Limit)
+			}
+		} else {
+			if params.Since != "" {
+				since, _ := strconv.Atoi(params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" ", forumId, since)
+			} else {
+				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" ", forumId)
+			}
+		}
+	}
+
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return usersFound, fmt.Errorf("can't find users with forum %s", forumSlug)
+	}
+	for rows.Next() {
+		var userFound User
+		err = rows.Scan(&userFound.About, &userFound.Fullname, &userFound.Nickname, &userFound.Email)
+		if err != nil {
+			log.Println(err)
+			errRollback := transaction.Rollback()
+			if err != nil {
+				log.Fatalln(errRollback)
+			}
+			return usersFound, err
+		}
+		usersFound = append(usersFound, userFound)
+	}
+	if len(usersFound) == 0 {
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return usersFound, fmt.Errorf("can't find users with forum %s", forumSlug)
+	}
+	err = transaction.Commit()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return usersFound, nil
 }

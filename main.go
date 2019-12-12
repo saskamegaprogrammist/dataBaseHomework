@@ -22,15 +22,15 @@ func main() {
 	r.HandleFunc("/api/forum/create", handlers.CreateForum).Methods("POST")
 	r.HandleFunc("/api/forum/{slug}/create", handlers.CreateThread).Methods("POST")
 
-	//r.HandleFunc("/api/forum/{slug}/details", handlers.GetForum).Methods("GET")
-	//r.HandleFunc("/api/forum/{slug}/threads", handlers.GetThreadsByForum).Methods("GET")
-	//r.HandleFunc("/api/forum/{slug}/users", handlers.GetForumUsers).Methods("GET")
-	//
-	//r.HandleFunc("/api/thread/{slug_or_id}/create", handlers.CreatePosts).Methods("POST")
+	r.HandleFunc("/api/forum/{slug}/details", handlers.GetForum).Methods("GET")
+	r.HandleFunc("/api/forum/{slug}/threads", handlers.GetThreadsByForum).Methods("GET")
+	r.HandleFunc("/api/forum/{slug}/users", handlers.GetUsersByForum).Methods("GET")
+
+	r.HandleFunc("/api/thread/{slug_or_id}/create", handlers.CreatePosts).Methods("POST")
 	//r.HandleFunc("/api/thread/{slug_or_id}/vote", handlers.Vote).Methods("POST")
-	//r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.GetThread).Methods("GET")
+	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.GetThread).Methods("GET")
 	//r.HandleFunc("/api/thread/{slug_or_id}/posts", handlers.GetPosts).Methods("GET")
-	//r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.UpdateThread).Methods("POST")
+	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.UpdateThread).Methods("POST")
 	//
 	//r.HandleFunc("/api/post/{id:[0-9]+}/details", handlers.GetPost).Methods("GET")
 	//r.HandleFunc("/api/post/{id:[0-9]+}/details", handlers.UpdatePost).Methods("POST")
