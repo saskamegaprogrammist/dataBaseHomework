@@ -28,7 +28,10 @@ func (user *User) CreateUser() ([]User, error) {
 		log.Println(err)
 	}
 	var userExists User
-	_ = rows.Scan(&userExists.Id, &userExists.Nickname, &userExists.Email, &userExists.Fullname, &userExists.About)
+	err = rows.Scan(&userExists.Id, &userExists.Nickname, &userExists.Email, &userExists.Fullname, &userExists.About)
+	if err != nil {
+		log.Println(err)
+	}
 	if userExists.Id != 0  {
 		usersExists = append(usersExists, userExists)
 	}
@@ -37,7 +40,10 @@ func (user *User) CreateUser() ([]User, error) {
 	if err != nil {
 		log.Println(err)
 	}
-	_ = rows.Scan(&userExistsEmail.Id, &userExistsEmail.Nickname, &userExistsEmail.Email, &userExistsEmail.Fullname, &userExistsEmail.About)
+	err = rows.Scan(&userExistsEmail.Id, &userExistsEmail.Nickname, &userExistsEmail.Email, &userExistsEmail.Fullname, &userExistsEmail.About)
+	if err != nil {
+		log.Println(err)
+	}
 	if userExistsEmail.Id != 0 {
 		usersExists = append(usersExists, userExistsEmail)
 	}

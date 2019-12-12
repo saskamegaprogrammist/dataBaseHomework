@@ -7,9 +7,9 @@ DROP TABLE IF EXISTS thread CASCADE;
 CREATE TABLE forum_user (
     id SERIAL NOT NULL PRIMARY KEY,
     nickname citext NOT NULL UNIQUE,
-    email varchar(100) NOT NULL UNIQUE,
+    email citext NOT NULL UNIQUE,
     fullname varchar(100) NOT NULL,
-    about varchar(200)
+    about text
     CONSTRAINT valid_nickname CHECK (nickname ~* '^[A-Za-z0-9_.]+$')
 );
 
