@@ -10,7 +10,7 @@ import (
 
 type Thread struct {
 	Id int32 `json:"id"`
-	Slug string `json:"slug"`
+	Slug string `json:"-"`
 	Title string `json:"title"`
 	User string `json:"author"`
 	Forum string `json:"forum"`
@@ -50,7 +50,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	}
 	var threadExistsUserId int32
 	var threadExistsForumId int32
-	rows = transaction.QueryRow("SELECT * FROM thread WHERE (created, title) = ($1, $2)", thread.Date, thread.Title)
+	rows = transaction.QueryRow("SELECT * FROM thread WHERE (userid, title) = ($1, $2)",userId, thread.Title)
 	err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExistsUserId)
 	if err != nil {
 		log.Println(err)
@@ -62,8 +62,14 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		_ = rows.Scan(&threadExists.Forum)
 		return threadExists, fmt.Errorf("thread exists")
 	}
+	var time string
+	if thread.Date == "" {
+		time = time2.Now().Format(time2.RFC3339)
+	} else {
+		time = thread.Date
+	}
 	rows = transaction.QueryRow("INSERT INTO thread (userid, forumid, created, slug, message, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-		userId, forumId, thread.Date, thread.Slug, thread.Message, thread.Title )
+		userId, forumId, time, thread.Slug, thread.Message, thread.Title )
 	err = rows.Scan(&thread.Id)
 	if err != nil {
 		log.Println(err)

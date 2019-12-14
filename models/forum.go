@@ -27,9 +27,9 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		}
 		return forumExists, err
 	}
-	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", forum.User)
+	rows := transaction.QueryRow("SELECT id, nickname FROM forum_user WHERE nickname = $1", forum.User)
 	var userId int32
-	err = rows.Scan(&userId)
+	err = rows.Scan(&userId, &forum.User)
 	if err != nil || userId == 0 {
 		log.Println(err)
 		err = transaction.Rollback()

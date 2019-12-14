@@ -43,7 +43,7 @@ CREATE TRIGGER check_forum_user_email
 
 CREATE TABLE forum (
     id SERIAL NOT NULL PRIMARY KEY,
-    slug varchar(200) NOT NULL UNIQUE,
+    slug citext NOT NULL UNIQUE,
     title varchar(200) NOT NULL,
     posts int DEFAULT 0,
     threads int DEFAULT 0,
@@ -57,7 +57,7 @@ CREATE INDEX forum_slug_idx ON forum (slug);
 
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
-    slug varchar(200) NOT NULL UNIQUE,
+    slug citext NOT NULL UNIQUE,
     created timestamp DEFAULT '2017-01-01 00:00:00.000000',
     title varchar(100) NOT NULL,
     message text NOT NULL,
@@ -65,8 +65,8 @@ CREATE TABLE thread (
     forumid int NOT NULL,
     userid int NOT NULL,
     FOREIGN KEY (userid) REFERENCES forum_user (id),
-    FOREIGN KEY (forumid) REFERENCES forum (id),
-    CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
+    FOREIGN KEY (forumid) REFERENCES forum (id)
+--     CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 );
 
 CREATE UNIQUE INDEX thread_createdtitle_idx ON thread (created, title);
