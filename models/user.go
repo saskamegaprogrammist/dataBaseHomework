@@ -5,7 +5,6 @@ import (
 	"github.com/jackc/pgx"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
-	"strconv"
 )
 
 type User struct {
@@ -122,14 +121,48 @@ func (user *User) UpdateUser() (error, int) {
 		}
 		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 1
 	}
-	_, err = transaction.Exec("UPDATE forum_user SET (email, fullname, about) = ($2, $3, $4) WHERE nickname = $1;",  user.Nickname, user.Email, user.Fullname, user.About)
+	if user.Email != "" {
+		_, err = transaction.Exec("UPDATE forum_user SET email = $2 WHERE nickname = $1",  user.Nickname, user.Email)
+		if err != nil {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return fmt.Errorf("email exists %s", user.Email), 2
+		}
+	}
+	if user.About != "" {
+		_, err = transaction.Exec("UPDATE forum_user SET about = $2 WHERE nickname = $1",  user.Nickname, user.About)
+		if err != nil {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return err, 2
+		}
+	}
+	if user.Fullname != "" {
+		_, err = transaction.Exec("UPDATE forum_user SET fullname = $2 WHERE nickname = $1",  user.Nickname, user.Fullname)
+		if err != nil {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return err, 2
+		}
+	}
+	rows = transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
+	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
 		}
-		return fmt.Errorf("email exists %s", user.Email), 2
+		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 2
 	}
 	err = transaction.Commit()
 	if err != nil {
@@ -139,7 +172,7 @@ func (user *User) UpdateUser() (error, int) {
 }
 
 func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error) {
-	var usersFound []User
+	usersFound := make([]User, 0)
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
@@ -162,7 +195,7 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 		return usersFound, fmt.Errorf("can't find forum with slug %s", forumSlug)
 	}
 
-	sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
+	sqlSelect := "SELECT DISTINCT ON (nickname COLLATE \"C\") about, fullname, nickname, email FROM forum_user " +
 					"JOIN (SELECT COALESCE(p_userid, t_userid) as merge_id FROM ( " +
 							"SELECT DISTINCT userid as p_userid FROM post WHERE forumid = $1) as p " +
 							"FULL OUTER JOIN ( " +
@@ -174,33 +207,29 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 	if params.Decs {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				since, _ := strconv.Atoi(params.Since)
-				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" DESC LIMIT $3", forumId, since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  < $2 ORDER BY (nickname COLLATE \"C\") DESC LIMIT $3", forumId, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" DESC LIMIT $2", forumId, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC LIMIT $2", forumId, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				since, _ := strconv.Atoi(params.Since)
-				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" DESC", forumId, since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\" < $2 ORDER BY (nickname COLLATE \"C\") DESC", forumId, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" DESC", forumId)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC", forumId)
 			}
 		}
 	} else {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				since, _ := strconv.Atoi(params.Since)
-				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" LIMIT $3", forumId, since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") LIMIT $3", forumId, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" LIMIT $2", forumId, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") LIMIT $2", forumId, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				since, _ := strconv.Atoi(params.Since)
-				rows, err = transaction.Query(sqlSelect+" WHERE id > $2 ORDER BY nickname COLLATE \"C\" ", forumId, since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") ", forumId, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY nickname COLLATE \"C\" ", forumId)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") ", forumId)
 			}
 		}
 	}
@@ -226,13 +255,7 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 		}
 		usersFound = append(usersFound, userFound)
 	}
-	if len(usersFound) == 0 {
-		err = transaction.Rollback()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return usersFound, fmt.Errorf("can't find users with forum %s", forumSlug)
-	}
+
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)

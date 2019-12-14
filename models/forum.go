@@ -47,9 +47,9 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		return forumExists, fmt.Errorf("forum exists")
 	}
 
-	rows = transaction.QueryRow("INSERT INTO forum (slug, title, userid) VALUES ($1, $2, $3) RETURNING id",
+	rows = transaction.QueryRow("INSERT INTO forum (slug, title, userid) VALUES ($1, $2, $3) RETURNING id, slug",
 		forum.Slug, forum.Title, userId)
-	err = rows.Scan(&forum.Id)
+	err = rows.Scan(&forum.Id, &forum.Slug)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()

@@ -6,10 +6,8 @@ import (
 	"github.com/saskamegaprogrammist/dataBaseHomework/models"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
-	"math/rand"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func CreateThread (writer http.ResponseWriter, req *http.Request) {
@@ -22,11 +20,7 @@ func CreateThread (writer http.ResponseWriter, req *http.Request) {
 	}
 	forumSlug := mux.Vars(req)["slug"]
 	newThread.Forum = forumSlug
-	if newThread.Slug == "" {
-		title := newThread.Title
-		title = strings.ReplaceAll(title, " ", "-")
-		newThread.Slug = title + strconv.Itoa(rand.Intn(1000))
-	}
+
 	threadExists, err := newThread.CreateThread()
 	if err != nil {
 		if threadExists.Id != 0 {

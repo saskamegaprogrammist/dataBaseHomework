@@ -16,7 +16,6 @@ CREATE TABLE forum_user (
 CREATE UNIQUE INDEX forum_user_nickname_idx ON forum_user (nickname);
 CREATE UNIQUE INDEX forum_user_email_idx ON forum_user (email);
 
-
 CREATE OR REPLACE FUNCTION check_email() RETURNS TRIGGER
 LANGUAGE  plpgsql
 AS $check_forum_user_email$
@@ -57,8 +56,8 @@ CREATE INDEX forum_slug_idx ON forum (slug);
 
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
-    slug citext NOT NULL UNIQUE,
-    created timestamp DEFAULT '2017-01-01 00:00:00.000000',
+    slug citext NOT NULL,
+    created TIMESTAMP WITH TIME ZONE,
     title varchar(100) NOT NULL,
     message text NOT NULL,
     votes int DEFAULT 0,
@@ -100,8 +99,9 @@ CREATE VIEW thread_full_view  AS
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
     message text NOT NULL,
-    created timestamp,
+    created TIMESTAMP WITH TIME ZONE,
     parent int DEFAULT 0,
+    path BIGINT[] NOT NULL,
     isEdited boolean DEFAULT false,
     forumid int NOT NULL,
     userid int NOT NULL,
@@ -111,6 +111,8 @@ CREATE TABLE post (
     FOREIGN KEY (threadid) REFERENCES thread (id)
 );
 
+CREATE INDEX post_path ON post (path);
+CREATE INDEX post_level ON post (array_length(path, 1));
 CREATE INDEX post_forumid_idx ON post (forumid);
 
 CREATE OR REPLACE FUNCTION add_post() RETURNS TRIGGER
