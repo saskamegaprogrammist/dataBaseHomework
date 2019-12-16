@@ -112,25 +112,20 @@ func GetPostsByThread (writer http.ResponseWriter, req *http.Request) {
 	var searchParams utils.SearchParams
 	query := req.URL.Query()
 	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), query.Get("sort"))
-	var updatedThread models.Thread
+	var thread models.Thread
 	threadInfo := mux.Vars(req)["slug_or_id"]
 	threadId, err := strconv.Atoi(threadInfo)
 	if err != nil {
-		updatedThread.Slug = threadInfo
+		thread.Slug = threadInfo
 	} else {
-		updatedThread.Id = int32(threadId)
+		thread.Id = int32(threadId)
 	}
-	err = json.NewDecoder(req.Body).Decode(&updatedThread)
-	if err != nil {
-		log.Println(err)
-		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
-		return
-	}
+
 	posts := make([]models.Post, 0)
-	posts, err := models.GetPostsByThread(searchParams, forumSlug)
+	posts, err = models.GetPostsByThread(searchParams, thread)
 	if err != nil {
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
 	}
-	utils.CreateAnswer(writer, 200, users)
+	utils.CreateAnswer(writer, 200, posts)
 }

@@ -6,7 +6,7 @@ require (
 	github.com/Bowery/prompt v0.0.0-20190916142128-fa8279994f75 // indirect
 	github.com/aryann/difflib v0.0.0-20170710044230-e206f873d14a // indirect
 	github.com/bozaro/golorem v0.0.0-20170501165920-50e5b610280b // indirect
-	github.com/bozaro/tech-db-forum v0.2.2 // indirect
+	github.com/bozaro/tech-db-forum v0.2.2
 	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/go-openapi/analysis v0.19.7 // indirect
 	github.com/go-openapi/errors v0.19.3 // indirect

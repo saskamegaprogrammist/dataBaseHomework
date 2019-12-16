@@ -25,5 +25,6 @@ func (params *SearchParams) CreateParams (limit string, since string, desc strin
 	if desc == "true" {
 		params.Decs = true
 	}
+	params.Sort = sort
 }
 

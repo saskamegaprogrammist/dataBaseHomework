@@ -29,6 +29,9 @@ func CreateDataBaseConnection(user, password, host, name string, maxConn int) {
 		log.Println(err);
 		return
 	}
+	if err := Load(); err != nil {
+		return err
+	}
 }
 
 func InitDataBase() {
