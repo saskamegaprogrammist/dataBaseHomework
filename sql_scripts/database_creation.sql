@@ -96,6 +96,9 @@ CREATE VIEW thread_full_view  AS
                  JOIN (SELECT nickname as user_forum, id as uid FROM forum_user) as user_t ON user_t.uid = thread.userid
     JOIN (SELECT slug as forum, id as fid FROM forum) as forum_t ON forum_t.fid = thread.forumid;
 
+DROP SEQUENCE IF EXISTS post_id;
+CREATE SEQUENCE post_id START 1;
+
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
     message text NOT NULL,

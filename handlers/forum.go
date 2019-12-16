@@ -45,7 +45,7 @@ func GetThreadsByForum (writer http.ResponseWriter, req *http.Request) {
 	var searchParams utils.SearchParams
 	forumSlug := mux.Vars(req)["slug"]
 	query := req.URL.Query()
-	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"))
+	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), "")
 	threads := make([]models.Thread, 0)
 	threads, err := models.GetThreadsByForum(searchParams, forumSlug)
 	if err != nil {
@@ -61,12 +61,11 @@ func GetUsersByForum (writer http.ResponseWriter, req *http.Request) {
 	users := make([]models.User, 0)
 	forumSlug := mux.Vars(req)["slug"]
 	query := req.URL.Query()
-	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"))
+	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), "")
 	users, err := models.GetUsersByForum(searchParams, forumSlug)
 	if err != nil {
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
 	}
 	utils.CreateAnswer(writer, 200, users)
-
 }

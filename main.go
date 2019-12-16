@@ -29,7 +29,7 @@ func main() {
 	r.HandleFunc("/api/thread/{slug_or_id}/create", handlers.CreatePosts).Methods("POST")
 	//r.HandleFunc("/api/thread/{slug_or_id}/vote", handlers.Vote).Methods("POST")
 	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.GetThread).Methods("GET")
-	//r.HandleFunc("/api/thread/{slug_or_id}/posts", handlers.GetPosts).Methods("GET")
+	r.HandleFunc("/api/thread/{slug_or_id}/posts", handlers.GetPostsByThread).Methods("GET")
 	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.UpdateThread).Methods("POST")
 	//
 	//r.HandleFunc("/api/post/{id:[0-9]+}/details", handlers.GetPost).Methods("GET")

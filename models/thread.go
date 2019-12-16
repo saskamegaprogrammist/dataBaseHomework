@@ -233,7 +233,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int32) {
 			}
 			return newPosts, fmt.Errorf("can't find user"), 1
 		}
-		rows = transaction.QueryRow("INSERT INTO post (userid, forumid, created, parent, message, threadid) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, isEdited",
+		rows = transaction.QueryRow("INSERT INTO post (userid, forumid, created, parent, message, threadid, path) VALUES ($1, $2, $3, $4, $5, $6, (SELECT path FROM post WHERE id = $4) || (select nextval('post_id')::BIGINT)) RETURNING id, isEdited",
 			userId, forumId, timeNow, newPosts[i].Parent, newPosts[i].Message, thread.Id)
 		err = rows.Scan(&newPosts[i].Id, &newPosts[i].Edited)
 		if err != nil {
