@@ -465,6 +465,15 @@ func (thread *Thread) Vote(vote *Vote) error  {
 				}
 				return err
 			}
+			_, err = transaction.Exec("UPDATE votes SET vote = $3 WHERE userid = $1 AND threadid = $2", userId, thread.Id, vote.Voice)
+			if err != nil {
+				log.Println(err)
+				err = transaction.Rollback()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				return err
+			}
 		}
 	} else {
 		var id int

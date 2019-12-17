@@ -31,12 +31,12 @@ func main() {
 	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.GetThread).Methods("GET")
 	r.HandleFunc("/api/thread/{slug_or_id}/posts", handlers.GetPostsByThread).Methods("GET")
 	r.HandleFunc("/api/thread/{slug_or_id}/details", handlers.UpdateThread).Methods("POST")
-	//
+
 	r.HandleFunc("/api/post/{id:[0-9]+}/details", handlers.GetPost).Methods("GET")
 	r.HandleFunc("/api/post/{id:[0-9]+}/details", handlers.UpdatePost).Methods("POST")
-	//
-	//r.HandleFunc("/api/service/status", handlers.GetStatus).Methods("GET")
-	//r.HandleFunc("/api/service/clear", handlers.Clear).Methods("POST")
+
+	r.HandleFunc("/api/service/status", handlers.GetStatus).Methods("GET")
+	r.HandleFunc("/api/service/clear", handlers.Clear).Methods("POST")
 
 	err := http.ListenAndServe(":5000", r)
 	if err != nil {
