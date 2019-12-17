@@ -69,7 +69,7 @@ RUN mkdir -p src
 COPY ./ src/github.com/saskamegaprogrammist/dataBaseHomework
 WORKDIR /src/github.com/saskamegaprogrammist/dataBaseHomework
 RUN go get -d -v
-RUN go build
+RUN go build .
 
 # Expose server port
 EXPOSE 5000
