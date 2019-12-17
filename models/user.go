@@ -8,7 +8,7 @@ import (
 )
 
 type User struct {
-	Id int32 `json:"-"`
+	Id int `json:"-"`
 	Nickname string `json:"nickname"`
 	Email string `json:"email"`
 	Fullname string `json:"fullname"`
@@ -110,7 +110,7 @@ func (user *User) UpdateUser() (error, int) {
 	if err != nil {
 		log.Println(err)
 	}
-	var userExistsId int32
+	var userExistsId int
 	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", user.Nickname)
 	err = rows.Scan(&userExistsId)
 	if err != nil {
@@ -183,7 +183,7 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 		}
 		return usersFound, err
 	}
-	var forumId int32
+	var forumId int
 	row := transaction.QueryRow("SELECT id FROM forum WHERE slug = $1", forumSlug)
 	err = row.Scan(&forumId)
 	if err != nil {

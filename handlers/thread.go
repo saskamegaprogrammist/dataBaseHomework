@@ -41,7 +41,7 @@ func CreatePosts (writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		thread.Slug = threadInfo
 	} else {
-		thread.Id = int32(threadId)
+		thread.Id = int(threadId)
 	}
 	var newPosts [] models.Post
 	err = json.NewDecoder(req.Body).Decode(&newPosts)
@@ -73,7 +73,7 @@ func GetThread (writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		foundThread.Slug = threadInfo
 	} else {
-		foundThread.Id = int32(threadId)
+		foundThread.Id = int(threadId)
 	}
 	err = foundThread.GetThread()
 	if err != nil {
@@ -90,7 +90,7 @@ func UpdateThread (writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		updatedThread.Slug = threadInfo
 	} else {
-		updatedThread.Id = int32(threadId)
+		updatedThread.Id = int(threadId)
 	}
 	err = json.NewDecoder(req.Body).Decode(&updatedThread)
 	if err != nil {
@@ -118,7 +118,7 @@ func GetPostsByThread (writer http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		thread.Slug = threadInfo
 	} else {
-		thread.Id = int32(threadId)
+		thread.Id = int(threadId)
 	}
 
 	posts := make([]models.Post, 0)
@@ -128,4 +128,29 @@ func GetPostsByThread (writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 	utils.CreateAnswer(writer, 200, posts)
+}
+
+
+func Vote(writer http.ResponseWriter, req *http.Request) {
+	var newVote models.Vote
+	var updatedThread models.Thread
+	threadInfo := mux.Vars(req)["slug_or_id"]
+	threadId, err := strconv.Atoi(threadInfo)
+	if err != nil {
+		updatedThread.Slug = threadInfo
+	} else {
+		updatedThread.Id = int(threadId)
+	}
+	err = json.NewDecoder(req.Body).Decode(&newVote)
+	if err != nil {
+		log.Println(err)
+		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
+		return
+	}
+	err = updatedThread.Vote(&newVote)
+	if err != nil {
+		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
+		return
+	}
+	utils.CreateAnswer(writer, 200, updatedThread)
 }

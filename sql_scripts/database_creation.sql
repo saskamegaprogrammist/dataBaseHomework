@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS forum_user CASCADE;
 DROP TABLE IF EXISTS forum CASCADE;
 DROP TABLE IF EXISTS post CASCADE;
 DROP TABLE IF EXISTS thread CASCADE;
+DROP TABLE IF EXISTS votes CASCADE;
 
 CREATE TABLE forum_user (
     id SERIAL NOT NULL PRIMARY KEY,
@@ -156,3 +157,15 @@ CREATE TRIGGER check_post_parent
     BEFORE INSERT OR UPDATE ON post
     FOR EACH ROW
     EXECUTE PROCEDURE check_parent();
+
+CREATE TABLE votes (
+    id SERIAL NOT NULL PRIMARY KEY,
+    userid int NOT NULL ,
+    vote int DEFAULT 0,
+    threadid int NOT NULL ,
+    FOREIGN KEY (userid) REFERENCES forum_user (id),
+    FOREIGN KEY (threadid) REFERENCES thread (id)
+);
+
+CREATE INDEX votes_thread_idx ON votes (userid);
+CREATE INDEX votes_user_idx ON votes (threadid);

@@ -7,12 +7,12 @@ import (
 )
 
 type Forum struct {
-	Id int32 `json:"-"`
+	Id int `json:"-"`
 	Slug string `json:"slug"`
 	Title string `json:"title"`
 	User string `json:"user"`
-	Threads int32 `json:"threads"`
-	Posts int32 `json:"posts"`
+	Threads int `json:"threads"`
+	Posts int `json:"posts"`
 }
 
 func (forum *Forum) CreateForum() (Forum, error) {
@@ -28,7 +28,7 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		return forumExists, err
 	}
 	rows := transaction.QueryRow("SELECT id, nickname FROM forum_user WHERE nickname = $1", forum.User)
-	var userId int32
+	var userId int
 	err = rows.Scan(&userId, &forum.User)
 	if err != nil || userId == 0 {
 		log.Println(err)
@@ -39,7 +39,7 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		return forumExists, fmt.Errorf("can't find user with nickname %s", forum.User)
 	}
 	rows = transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forum.Slug)
-	var forumExistsUserId int32
+	var forumExistsUserId int
 	_ = rows.Scan(&forumExists.Id, &forumExists.Slug, &forumExists.Title, &forumExists.Posts, &forumExists.Threads, &forumExistsUserId)
 	if forumExists.Id != 0  {
 		rows = transaction.QueryRow("SELECT nickname FROM forum_user WHERE id = $1", forumExistsUserId)
@@ -76,7 +76,7 @@ func (forum *Forum) GetForum(forumSlug string) error {
 		}
 		return err
 	}
-	var forumUserId int32
+	var forumUserId int
 	rows := transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forumSlug)
 	err = rows.Scan(&forum.Id, &forum.Slug, &forum.Title, &forum.Posts, &forum.Threads, &forumUserId)
 	if err != nil {
