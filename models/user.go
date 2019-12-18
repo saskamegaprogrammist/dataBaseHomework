@@ -31,16 +31,23 @@ func (user *User) CreateUser() ([]User, error) {
 	if err != nil {
 		log.Println(err)
 	}
-			var schema string
-			rows = transaction.QueryRow("select \"current_schema\"()::text")
+
+			row, err := transaction.Query("SELECT extname::text FROM pg_extension")
+
 			if err != nil {
 				log.Println(err)
 			}
-			err = rows.Scan(&schema)
-			if err != nil {
-				log.Println(err)
+
+			for row.Next() {
+				var name string
+				err = rows.Scan(&name)
+				fmt.Println(name)
+
+				if err != nil {
+					log.Println(err)
+				}
+
 			}
-			fmt.Println(schema)
 
 
 
