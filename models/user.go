@@ -64,6 +64,7 @@ func (user *User) CreateUser() ([]User, error) {
 		}
 		return nil, err
 	}
+	fmt.Println(user.Id)
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)
@@ -92,6 +93,7 @@ func (user *User) GetUser(userNickname string) error {
 		}
 		return fmt.Errorf("can't find user with nickname %s", userNickname)
 	}
+	fmt.Println(user.Nickname)
 	err = transaction.Commit()
 	if err != nil {
 		log.Println(err)
