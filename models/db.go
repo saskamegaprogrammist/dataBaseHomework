@@ -69,7 +69,7 @@ func (db *DB) GetStatus() error {
 func (db *DB) Clear() error {
 	dataBase := utils.GetDataBase()
 	_, err := dataBase.Exec(`
-CREATE EXTENSION IF NOT EXISTS citext SCHEMA public FROM unpackaged;
+CREATE EXTENSION IF NOT EXISTS citext;
 DROP TABLE IF EXISTS forum_user CASCADE;
 DROP TABLE IF EXISTS forum CASCADE;
 DROP TABLE IF EXISTS post CASCADE;

@@ -32,7 +32,7 @@ func CreateDataBaseConnection(user, password, host, name string, maxConn int) {
 
 func InitDataBase() {
 	_, err := dataBasePool.Exec(`
-CREATE EXTENSION IF NOT EXISTS citext SCHEMA public FROM unpackaged;
+CREATE EXTENSION IF NOT EXISTS citext;
 DROP TABLE IF EXISTS forum_user CASCADE;
 DROP TABLE IF EXISTS forum CASCADE;
 DROP TABLE IF EXISTS post CASCADE;
