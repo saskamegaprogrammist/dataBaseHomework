@@ -10,7 +10,7 @@ RUN apt-get update
 #installing postgresql
 ENV PGVER 10
 # using package install
-RUN apt -y update && apt install -y postgresql-$PGVER wget git
+RUN apt -y update && apt install -y postgresql-$PGVER postgresql-contrib wget git
 
 # Run the rest of the commands as the ``postgres``
 # user created by the ``postgres-$PGVER`` package
