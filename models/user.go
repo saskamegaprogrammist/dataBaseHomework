@@ -43,6 +43,7 @@ func (user *User) CreateUser() ([]User, error) {
 	if err != nil {
 		log.Println(err)
 	}
+	fmt.Println(user.Email, userExists)
 	if userExistsEmail.Id != 0 && userExists.Id != userExistsEmail.Id  {
 		usersExists = append(usersExists, userExistsEmail)
 	}
