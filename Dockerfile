@@ -16,7 +16,6 @@ ADD ./db.sql /opt/db.sql
 RUN /etc/init.d/postgresql start &&\
 	psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
 	createdb -O docker docker &&\
-    psql -f /opt/db.sql -d docker &&\
     /etc/init.d/postgresql stop
 ENV POSTGRES_DSN=postgres://docker:docker@localhost/docker
 
