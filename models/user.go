@@ -32,7 +32,7 @@ func (user *User) CreateUser() ([]User, error) {
 		log.Println(err)
 	}
 
-			row, err := transaction.Query("SELECT extname::text FROM pg_extension")
+			row, err := transaction.Query("SELECT current_database()")
 
 			if err != nil {
 				log.Println(err)
