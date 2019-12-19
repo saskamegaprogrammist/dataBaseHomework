@@ -12,7 +12,7 @@ RUN apt -y update && apt install -y postgresql-$PGVER
 
 USER postgres
 
-ADD ./db.sql /opt/db.sql
+
 RUN /etc/init.d/postgresql start &&\
 	psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
 	createdb -O docker docker &&\
