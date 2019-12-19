@@ -36,6 +36,6 @@ USER root
 
 EXPOSE 5000
 
-COPY --from=build /opt/app/techDB /usr/bin/
+COPY --from=build /opt/app/dataBaseHomework /usr/bin/
 
-CMD service postgresql start && techDB
+CMD service postgresql start && dataBaseHomework
