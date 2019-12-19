@@ -85,7 +85,6 @@ CREATE TABLE forum_user (
     email citext NOT NULL UNIQUE,
     fullname varchar(100) NOT NULL,
     about text
-    CONSTRAINT valid_nickname CHECK (nickname ~* '^[A-Za-z0-9_.]+$')
 );
 
 CREATE UNIQUE INDEX forum_user_nickname_idx ON forum_user (nickname);
