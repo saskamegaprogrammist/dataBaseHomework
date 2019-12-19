@@ -1,4 +1,4 @@
-SET search_path TO docker;
+SET search_path TO public.docker;
 CREATE EXTENSION IF NOT EXISTS citext;
 ALTER EXTENSION citext SET SCHEMA public;
 DROP TABLE IF EXISTS forum_user CASCADE;
