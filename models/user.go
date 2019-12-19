@@ -32,22 +32,20 @@ func (user *User) CreateUser() ([]User, error) {
 		log.Println(err)
 	}
 
-			row, err := transaction.Query("SELECT current_database()")
 
+			rows = transaction.QueryRow("SELECT current_database()::text")
 			if err != nil {
 				log.Println(err)
 			}
 
-			for row.Next() {
 				var name string
-				err = rows.Scan(&name)
-				fmt.Println(name)
 
-				if err != nil {
-					log.Println(err)
-				}
-
+			err = rows.Scan(&name)
+			if err != nil {
+				log.Println(err)
 			}
+
+			fmt.Println(name)
 
 
 
