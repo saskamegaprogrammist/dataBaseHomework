@@ -32,7 +32,8 @@ func CreateDataBaseConnection(user, password, host, name string, maxConn int) {
 
 func InitDataBase() {
 	_, err := dataBasePool.Exec(`
-SET search_path TO public.docker;
+SET search_path TO docker;
+SET search_path TO public;
 CREATE EXTENSION IF NOT EXISTS citext;
 ALTER EXTENSION citext SET SCHEMA public;
 DROP TABLE IF EXISTS forum_user CASCADE;

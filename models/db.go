@@ -69,7 +69,8 @@ func (db *DB) GetStatus() error {
 func (db *DB) Clear() error {
 	dataBase := utils.GetDataBase()
 	_, err := dataBase.Exec(`
-SET search_path TO public.docker;
+SET search_path TO docker;
+SET search_path TO public;
 CREATE EXTENSION IF NOT EXISTS citext;
 ALTER EXTENSION citext SET SCHEMA public;
 DROP TABLE IF EXISTS forum_user CASCADE;
