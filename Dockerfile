@@ -17,7 +17,7 @@ RUN /etc/init.d/postgresql start &&\
 	psql --command "CREATE USER docker WITH SUPERUSER PASSWORD 'docker';" &&\
 	createdb -O docker docker &&\
 	psql --command "GRANT ALL ON DATABASE docker TO docker;" &&\
-	psql -d postgres --command "CREATE EXTENSION IF NOT EXISTS citext;"
+	psql -d postgres --command "CREATE EXTENSION IF NOT EXISTS citext;" &&\
     /etc/init.d/postgresql stop
 
 ENV POSTGRES_DSN=postgres://docker:docker@localhost/docker
