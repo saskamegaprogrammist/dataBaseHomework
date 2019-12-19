@@ -81,8 +81,8 @@ DROP TABLE IF EXISTS votes CASCADE;
 
 CREATE TABLE forum_user (
     id SERIAL NOT NULL PRIMARY KEY,
-    nickname tex NOT NULL UNIQUE,
-    email tex NOT NULL UNIQUE,
+    nickname textNOT NULL UNIQUE,
+    email textNOT NULL UNIQUE,
     fullname varchar(100) NOT NULL,
     about text
 );
@@ -116,7 +116,7 @@ CREATE TRIGGER check_forum_user_email
 
 CREATE TABLE forum (
     id SERIAL NOT NULL PRIMARY KEY,
-    slug tex NOT NULL UNIQUE,
+    slug textNOT NULL UNIQUE,
     title varchar(200) NOT NULL,
     posts int DEFAULT 0,
     threads int DEFAULT 0,
@@ -130,7 +130,7 @@ CREATE INDEX forum_slug_idx ON forum (slug);
 
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
-    slug tex NOT NULL,
+    slug textNOT NULL,
     created TIMESTAMP WITH TIME ZONE,
     title varchar(100) NOT NULL,
     message text NOT NULL,
