@@ -50,7 +50,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	}
 	var threadExistsUserId int
 	var threadExistsForumId int
-	rows = transaction.QueryRow("SELECT * FROM thread WHERE (userid, title) = ($1, $2)",userId, thread.Title)
+	rows = transaction.QueryRow("SELECT * FROM thread WHERE (userid, title, forumid) = ($1, $2, $3)",userId, thread.Title, forumId)
 	err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExistsUserId)
 	if err != nil {
 		log.Println(err)
