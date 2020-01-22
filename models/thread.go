@@ -123,36 +123,36 @@ func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, e
 	if params.Decs {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC", forumSlug, since)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC  ", forumSlug)
 			}
 		}
 	} else {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created LIMIT $3", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 ORDER BY created LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forumslug " +
+				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 ORDER BY created ", forumSlug)
 			}
 		}
@@ -162,7 +162,7 @@ func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, e
 	}
 	for rows.Next() {
 		var threadFound Thread
-		err = rows.Scan(&threadFound.Id, &threadFound.Slug, &threadFound.Date, &threadFound.Title, &threadFound.Message, &threadFound.Votes, &threadFound.User, &threadFound.Forum)
+		err = rows.Scan(&threadFound.Id, &threadFound.Slug, &threadFound.Date, &threadFound.Title, &threadFound.Message, &threadFound.Votes, &threadFound.Forum, &threadFound.User)
 		if err != nil {
 			log.Println(err)
 			err = transaction.Rollback()

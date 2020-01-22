@@ -70,7 +70,6 @@ CREATE TABLE thread (
 --     CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 );
 CREATE INDEX thread_slug ON thread(slug);
-CREATE INDEX thread_createdtitle_idx ON thread (created, title);
 CREATE INDEX thread_forumslug_idx ON thread (forumslug);
 
 DROP SEQUENCE IF EXISTS post_id;
@@ -87,10 +86,10 @@ CREATE TABLE post (
     usernick citext NOT NULL,
     threadid int NOT NULL
 );
-CREATE INDEX post_thread_idx ON post (id, threadid);
-CREATE INDEX post_path ON post (path);
-CREATE INDEX post_created ON post (created);
-CREATE INDEX post_level ON post (array_length(path, 1));
+CREATE INDEX post_thread_idx ON post (threadid, id);
+CREATE INDEX post_path ON post (threadid, path);
+CREATE INDEX post_created ON post (threadid, created);
+CREATE INDEX post_level ON post (threadid, array_length(path, 1));
 CREATE INDEX post_forumslug_idx ON post (forumslug);
 
 CREATE TABLE votes (
