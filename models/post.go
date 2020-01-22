@@ -267,6 +267,7 @@ func (post *Post) GetPost() (error, string, string) {
 		}
 		return fmt.Errorf("can't find post with id %d", post.Id), post.User, post.Forum
 	}
+	fmt.Println(post.Date)
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)
