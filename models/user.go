@@ -217,12 +217,12 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 	}
 
 	sqlSelect := "SELECT DISTINCT ON (nickname COLLATE \"C\") about, fullname, nickname, email FROM forum_user " +
-					"JOIN (SELECT COALESCE(p_userid, t_userid) as merge_id FROM ( " +
-							"SELECT DISTINCT userid as p_userid FROM post WHERE forumid = $1) as p " +
+					"JOIN (SELECT COALESCE(p_usernick, t_usernick) as merge_nick FROM ( " +
+							"SELECT DISTINCT usernick as p_usernick FROM post WHERE forumid = $1) as p " +
 							"FULL OUTER JOIN ( " +
-								"SELECT DISTINCT userid as t_userid  FROM thread WHERE forumid = $1) " +
-							"as t ON p.p_userid = t.t_userid) " +
-					"as u ON u.merge_id = forum_user.id"
+								"SELECT DISTINCT usernick as t_usernick  FROM thread WHERE forumid = $1) " +
+							"as t ON p.p_usernick = t.t_usernick) " +
+					"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
 
 	if params.Decs {

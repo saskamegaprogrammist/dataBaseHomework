@@ -39,16 +39,13 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		return forumExists, fmt.Errorf("can't find user with nickname %s", forum.User)
 	}
 	rows = transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forum.Slug)
-	var forumExistsUserId int
-	_ = rows.Scan(&forumExists.Id, &forumExists.Slug, &forumExists.Title, &forumExists.Posts, &forumExists.Threads, &forumExistsUserId)
+	_ = rows.Scan(&forumExists.Id, &forumExists.Slug, &forumExists.Title, &forumExists.Posts, &forumExists.Threads, &forumExists.User)
 	if forumExists.Id != 0  {
-		rows = transaction.QueryRow("SELECT nickname FROM forum_user WHERE id = $1", forumExistsUserId)
-		_ = rows.Scan(&forumExists.User)
 		return forumExists, fmt.Errorf("forum exists")
 	}
 
-	rows = transaction.QueryRow("INSERT INTO forum (slug, title, userid) VALUES ($1, $2, $3) RETURNING id, slug",
-		forum.Slug, forum.Title, userId)
+	rows = transaction.QueryRow("INSERT INTO forum (slug, title, usernick) VALUES ($1, $2, $3) RETURNING id, slug",
+		forum.Slug, forum.Title, forum.User)
 	err = rows.Scan(&forum.Id, &forum.Slug)
 	if err != nil {
 		log.Println(err)
@@ -76,9 +73,8 @@ func (forum *Forum) GetForum(forumSlug string) error {
 		}
 		return err
 	}
-	var forumUserId int
 	rows := transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forumSlug)
-	err = rows.Scan(&forum.Id, &forum.Slug, &forum.Title, &forum.Posts, &forum.Threads, &forumUserId)
+	err = rows.Scan(&forum.Id, &forum.Slug, &forum.Title, &forum.Posts, &forum.Threads, &forum.User)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -86,16 +82,6 @@ func (forum *Forum) GetForum(forumSlug string) error {
 			log.Fatalln(err)
 		}
 		return fmt.Errorf("can't find forum with slug %s", forumSlug)
-	}
-	rows = transaction.QueryRow("SELECT nickname FROM forum_user WHERE id = $1", forumUserId)
-	err = rows.Scan(&forum.User)
-	if err != nil {
-		log.Println(err)
-		err = transaction.Rollback()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return err
 	}
 	err = transaction.Commit()
 	if err != nil {

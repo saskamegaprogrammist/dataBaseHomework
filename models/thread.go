@@ -48,36 +48,31 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		}
 		return threadExists, fmt.Errorf("can't find forum ")
 	}
-	var threadExistsUserId int
 	var threadExistsForumId int
-	rows = transaction.QueryRow("SELECT * FROM thread WHERE (userid, title, forumid) = ($1, $2, $3)",userId, thread.Title, forumId)
-	err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExistsUserId)
+	rows = transaction.QueryRow("SELECT * FROM thread WHERE (usernick, title, forumid, message) = ($1, $2, $3, $4)",thread.User, thread.Title, forumId, thread.Message)
+	err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExists.User)
 	if err != nil {
 		log.Println(err)
 	}
 	if threadExists.Id != 0  {
-		rows = transaction.QueryRow("SELECT nickname FROM forum_user WHERE id = $1", threadExistsUserId)
-		_ = rows.Scan(&threadExists.User)
 		rows = transaction.QueryRow("SELECT slug FROM forum WHERE id = $1", threadExistsForumId)
 		_ = rows.Scan(&threadExists.Forum)
 		return threadExists, fmt.Errorf("thread exists")
 	}
 	if thread.Slug != "" {
 		rows = transaction.QueryRow("SELECT * FROM thread WHERE slug = $1", thread.Slug)
-		err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExistsUserId)
+		err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExistsForumId, &threadExists.User)
 		if err != nil {
 			log.Println(err)
 		}
 		if threadExists.Id != 0 {
-			rows = transaction.QueryRow("SELECT nickname FROM forum_user WHERE id = $1", threadExistsUserId)
-			_ = rows.Scan(&threadExists.User)
 			rows = transaction.QueryRow("SELECT slug FROM forum WHERE id = $1", threadExistsForumId)
 			_ = rows.Scan(&threadExists.Forum)
 			return threadExists, fmt.Errorf("thread exists")
 		}
 	}
-	rows = transaction.QueryRow("INSERT INTO thread (userid, forumid, created, slug, message, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
-		userId, forumId, thread.Date, thread.Slug, thread.Message, thread.Title )
+	rows = transaction.QueryRow("INSERT INTO thread (usernick, forumid, created, slug, message, title) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		thread.User, forumId, thread.Date, thread.Slug, thread.Message, thread.Title )
 	err = rows.Scan(&thread.Id)
 	if err != nil {
 		log.Println(err)
@@ -122,36 +117,36 @@ func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, e
 	if params.Decs {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 ORDER BY created DESC LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 AND created <= $2 ORDER BY created DESC", forumSlug, since)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 ORDER BY created DESC  ", forumSlug)
 			}
 		}
 	} else {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 AND created >= $2 ORDER BY created LIMIT $3", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 ORDER BY created LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 AND created >= $2 ORDER BY created", forumSlug, since, params.Limit)
 			} else {
-				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, user_forum, forum " +
+				rows, err = transaction.Query("SELECT id, slug, created, title, message, votes, usernick, forum " +
 					"FROM thread_full_view WHERE forum =  $1 ORDER BY created ", forumSlug)
 			}
 		}
@@ -236,9 +231,25 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			}
 			return newPosts, fmt.Errorf("can't find user"), 1
 		}
-		rows = transaction.QueryRow("INSERT INTO post (userid, forumid, created, parent, message, threadid, path) VALUES ($1, $2, $3, $4, $5, $6, (SELECT path FROM post WHERE id = $4) || (select nextval('post_id')::BIGINT)) RETURNING id, isEdited",
-			userId, forumId, timeNow, newPosts[i].Parent, newPosts[i].Message, thread.Id)
+
+		if newPosts[i].Parent != 0 {
+			var existingParent int
+			rows = transaction.QueryRow("SELECT id FROM post WHERE id = $1 AND threadid = $2", newPosts[i].Parent, thread.Id)
+			err = rows.Scan(&existingParent)
+			if err != nil || existingParent==0 {
+				errRollback := transaction.Rollback()
+				if errRollback != nil {
+					log.Fatalln(errRollback)
+				}
+				return newPosts, fmt.Errorf("Cannot insert post, parent doesnot exist"), 2
+			}
+		}
+
+
+		rows = transaction.QueryRow("INSERT INTO post (usernick, forumid, created, parent, message, threadid, path) VALUES ($1, $2, $3, $4, $5, $6, (SELECT path FROM post WHERE id = $4) || (select nextval('post_id')::BIGINT)) RETURNING id, isEdited",
+			newPosts[i].User, forumId, timeNow, newPosts[i].Parent, newPosts[i].Message, thread.Id)
 		err = rows.Scan(&newPosts[i].Id, &newPosts[i].Edited)
+		fmt.Println(newPosts[i].Id, thread.Id, forumId, len(newPosts))
 		if err != nil {
 			log.Println(err)
 			errRollback := transaction.Rollback()
@@ -248,8 +259,19 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			return newPosts, err, 2
 		}
 		newPosts[i].Date = timeNow
-		newPosts[i].Thread = int(thread.Id)
+		newPosts[i].Thread = thread.Id
 		newPosts[i].Forum = thread.Forum
+	}
+	if len(newPosts) != 0 {
+		_, err = transaction.Exec("UPDATE forum SET posts = posts + $1 WHERE forum.id = $2 ",  len(newPosts), forumId)
+		if err != nil {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return newPosts, err, 2
+		}
 	}
 	err = transaction.Commit()
 	if err != nil {
@@ -270,7 +292,7 @@ func (thread *Thread) GetThread() error {
 		return err
 	}
 	if thread.Id != 0 {
-		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, user_forum, forum FROM thread_full_view WHERE id = $1", thread.Id)
+		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forum FROM thread_full_view WHERE id = $1", thread.Id)
 		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
 		if err != nil {
 			log.Println(err)
@@ -281,7 +303,7 @@ func (thread *Thread) GetThread() error {
 			return fmt.Errorf("can't find thread with id %d", thread.Id)
 		}
 	} else {
-		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, user_forum, forum FROM thread_full_view WHERE slug = $1",  thread.Slug)
+		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forum FROM thread_full_view WHERE slug = $1",  thread.Slug)
 		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
 		if err != nil {
 			err = transaction.Rollback()
@@ -360,7 +382,7 @@ func (thread *Thread) UpdateThread() error  {
 			return err
 		}
 	}
-	rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, user_forum, forum FROM thread_full_view WHERE id = $1",  thread.Id)
+	rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forum FROM thread_full_view WHERE id = $1",  thread.Id)
 	err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
 	if err != nil {
 		errRollback := transaction.Rollback()
@@ -499,7 +521,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 		}
 	}
 
-	rows = transaction.QueryRow("SELECT id, slug, created, title, message, votes, user_forum, forum FROM thread_full_view WHERE id = $1",  thread.Id)
+	rows = transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forum FROM thread_full_view WHERE id = $1",  thread.Id)
 	err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
 	if err != nil {
 		errRollback := transaction.Rollback()
