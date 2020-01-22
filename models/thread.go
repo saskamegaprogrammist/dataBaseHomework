@@ -227,6 +227,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 	}
 	if len(newPosts) != 0 {
 		timeNow := time.Now()
+		fmt.Println(timeNow)
 		vals := []interface{}{}
 		query := "INSERT INTO post (usernick, forumslug, created, parent, message, threadid, path) VALUES"
 		for i:=0; i<len(newPosts); i++ {
@@ -259,7 +260,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 
 		}
 		query = query[:len(query)-1]
-		query += " RETURNING id, isEdited";
+		query += " RETURNING id, isEdited, created";
 
 		count := strings.Count(query, "?")
 		for k := 0; k < count; k++ {
@@ -269,8 +270,9 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 		rowsMany, err := transaction.Query(query, vals...)
 		j:=0
 		for rowsMany.Next() {
-			err = rowsMany.Scan(&newPosts[j].Id, &newPosts[j].Edited)
-			fmt.Println(newPosts[j].Id, thread.Id, forumSlug, len(newPosts))
+			var time time.Time
+			err = rowsMany.Scan(&newPosts[j].Id, &newPosts[j].Edited, &time)
+			fmt.Println(time)
 			if err != nil {
 				log.Println(err)
 				errRollback := transaction.Rollback()
@@ -279,7 +281,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 				}
 				return newPosts, err, 2
 			}
-			newPosts[j].Date = timeNow
+			newPosts[j].Date = time
 			newPosts[j].Thread = thread.Id
 			newPosts[j].Forum = thread.Forum
 			j++

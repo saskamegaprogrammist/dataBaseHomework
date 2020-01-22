@@ -94,7 +94,7 @@ CREATE INDEX forum_slug_idx ON forum (slug);
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
     slug citext NOT NULL,
-    created TIMESTAMPTZ,
+    created TIMESTAMPTZ(9),
     title varchar(100) NOT NULL,
     message text NOT NULL,
     votes int DEFAULT 0,
@@ -112,7 +112,7 @@ CREATE SEQUENCE post_id START 1;
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
     message text NOT NULL,
-    created TIMESTAMPTZ,
+    created TIMESTAMPTZ(9), 
     parent int DEFAULT 0,
     path BIGINT[] NOT NULL,
     isEdited boolean DEFAULT false,
