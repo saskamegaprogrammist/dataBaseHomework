@@ -227,7 +227,6 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 	}
 	if len(newPosts) != 0 {
 		timeNow := time.Now()
-		fmt.Println(timeNow)
 		vals := []interface{}{}
 		query := "INSERT INTO post (usernick, forumslug, created, parent, message, threadid, path) VALUES"
 		for i:=0; i<len(newPosts); i++ {
@@ -272,7 +271,6 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 		for rowsMany.Next() {
 			var time time.Time
 			err = rowsMany.Scan(&newPosts[j].Id, &newPosts[j].Edited, &time)
-			fmt.Println(time)
 			if err != nil {
 				log.Println(err)
 				errRollback := transaction.Rollback()
@@ -315,8 +313,8 @@ func (thread *Thread) GetThread() error {
 		return err
 	}
 	if thread.Id != 0 {
-		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forumslug FROM thread WHERE id = $1", thread.Id)
-		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
+		rows := transaction.QueryRow("SELECT * FROM thread WHERE id = $1", thread.Id)
+		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 		if err != nil {
 			log.Println(err)
 			err = transaction.Rollback()
@@ -326,8 +324,8 @@ func (thread *Thread) GetThread() error {
 			return fmt.Errorf("can't find thread with id %d", thread.Id)
 		}
 	} else {
-		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forumslug FROM thread WHERE slug = $1",  thread.Slug)
-		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
+		rows := transaction.QueryRow("SELECT * FROM thread WHERE slug = $1",  thread.Slug)
+		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 		if err != nil {
 			err = transaction.Rollback()
 			if err != nil {

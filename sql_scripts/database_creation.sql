@@ -18,6 +18,7 @@ CREATE TABLE forum_user (
 );
 
 CREATE INDEX forum_user_nickname_idx ON forum_user (nickname);
+CREATE INDEX forum_user_nickname_collate_idx ON forum_user (nickname COLLATE "C");
 CREATE INDEX forum_user_email_idx ON forum_user (email);
 
 CREATE OR REPLACE FUNCTION check_email() RETURNS TRIGGER

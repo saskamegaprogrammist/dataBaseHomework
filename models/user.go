@@ -45,10 +45,6 @@ func (user *User) CreateUser() ([]User, error) {
 				log.Println(err)
 			}
 
-			fmt.Println(name)
-
-
-
 	if userExists.Id != 0  {
 		usersExists = append(usersExists, userExists)
 	}
@@ -61,7 +57,6 @@ func (user *User) CreateUser() ([]User, error) {
 	if err != nil {
 		log.Println(err)
 	}
-	fmt.Println(user.Email, userExists)
 	if userExistsEmail.Id != 0 && userExists.Id != userExistsEmail.Id  {
 		usersExists = append(usersExists, userExistsEmail)
 	}
@@ -83,7 +78,6 @@ func (user *User) CreateUser() ([]User, error) {
 		}
 		return nil, err
 	}
-	fmt.Println(user.Id)
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)
@@ -112,7 +106,6 @@ func (user *User) GetUser(userNickname string) error {
 		}
 		return fmt.Errorf("can't find user with nickname %s", userNickname)
 	}
-	fmt.Println(user.Nickname)
 	err = transaction.Commit()
 	if err != nil {
 		log.Println(err)

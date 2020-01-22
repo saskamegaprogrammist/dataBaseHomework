@@ -225,8 +225,6 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 	for rows.Next() {
 		var postFound Post
 		err = rows.Scan(&postFound.Id, &postFound.Message, &postFound.Date, &postFound.Parent, &postFound.Edited, &postFound.User)
-		fmt.Println(postFound)
-		fmt.Println(params)
 		if err != nil {
 			log.Println(err)
 			errRollback := transaction.Rollback()
@@ -267,7 +265,6 @@ func (post *Post) GetPost() (error, string, string) {
 		}
 		return fmt.Errorf("can't find post with id %d", post.Id), post.User, post.Forum
 	}
-	fmt.Println(post.Date)
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)
@@ -316,41 +313,30 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		relatedPost.User = &newUser
 	}
 	if strings.Contains(related, "forum") {
-		rows := transaction.QueryRow("SELECT id FROM forum WHERE slug = $1", forumSlug)
-		var forumId int
-		err = rows.Scan(&forumId)
-		if err != nil || forumId == 0 {
+		var newForum Forum
+		rows := transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forumSlug)
+		err = rows.Scan(&newForum.Id, &newForum.Slug, &newForum.Title, &newForum.Posts, &newForum.Threads, &newForum.User)
+		if err != nil {
 			log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
 			}
-			return relatedPost, fmt.Errorf("can't find forum ")
-		}
-		var newForum Forum
-		newForum.Id = forumId
-		err = newForum.GetForum(post.Forum)
-		if err != nil {
-			log.Println(err)
-			errRollback := transaction.Rollback()
-			if errRollback != nil {
-				log.Println(errRollback)
-			}
-			return relatedPost, err
+			return relatedPost, fmt.Errorf("can't find forum with slug %s", forumSlug)
 		}
 		relatedPost.Forum = &newForum
 	}
 	if strings.Contains(related, "thread") {
 		var newThread Thread
-		newThread.Id = post.Thread
-		err = newThread.GetThread()
+		rows := transaction.QueryRow("SELECT * FROM thread WHERE id = $1", post.Thread)
+		err = rows.Scan(&newThread.Id, &newThread.Slug, &newThread.Date, &newThread.Title, &newThread.Message, &newThread.Votes,  &newThread.Forum, &newThread.User)
 		if err != nil {
 			log.Println(err)
-			errRollback := transaction.Rollback()
-			if errRollback != nil {
-				log.Println(errRollback)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
 			}
-			return relatedPost, err
+			return relatedPost, fmt.Errorf("can't find thread with id %d", post.Thread)
 		}
 		relatedPost.Thread = &newThread
 	}
