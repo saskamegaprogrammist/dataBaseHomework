@@ -17,8 +17,8 @@ CREATE TABLE forum_user (
     CONSTRAINT valid_nickname CHECK (nickname ~* '^[A-Za-z0-9_.]+$')
 );
 
-CREATE UNIQUE INDEX forum_user_nickname_idx ON forum_user (nickname);
-CREATE UNIQUE INDEX forum_user_email_idx ON forum_user (email);
+CREATE INDEX forum_user_nickname_idx ON forum_user (nickname);
+CREATE INDEX forum_user_email_idx ON forum_user (email);
 
 CREATE OR REPLACE FUNCTION check_email() RETURNS TRIGGER
 LANGUAGE  plpgsql
@@ -51,7 +51,6 @@ CREATE TABLE forum (
     posts int DEFAULT 0,
     threads int DEFAULT 0,
     usernick citext NOT NULL,
-    FOREIGN KEY (usernick) REFERENCES forum_user (nickname),
     CONSTRAINT valid_slug CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 
 );
@@ -65,39 +64,13 @@ CREATE TABLE thread (
     title varchar(100) NOT NULL,
     message text NOT NULL,
     votes int DEFAULT 0,
-    forumid int NOT NULL,
-    usernick citext NOT NULL,
-    FOREIGN KEY (usernick) REFERENCES forum_user (nickname),
-    FOREIGN KEY (forumid) REFERENCES forum (id)
+    forumslug citext NOT NULL,
+    usernick citext NOT NULL
 --     CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 );
 CREATE INDEX thread_slug ON thread(slug);
-CREATE UNIQUE INDEX thread_createdtitle_idx ON thread (created, title);
-
-CREATE OR REPLACE FUNCTION add_thread() RETURNS TRIGGER
-LANGUAGE  plpgsql
-AS $add_forum_thread$
-BEGIN
-    UPDATE forum
-        SET threads = threads + 1
-        WHERE forum.id = NEW.forumid;
-    RETURN NEW;
-END
-$add_forum_thread$;
-
-
-CREATE TRIGGER add_forum_thread
-    AFTER INSERT ON thread
-    FOR EACH ROW
-    EXECUTE PROCEDURE add_thread();
-
-CREATE INDEX thread_forumid_idx ON thread (forumid);
-
-DROP VIEW IF EXISTS thread_full_view ;
-
-CREATE VIEW thread_full_view  AS
-    SELECT id, slug, created, title, message, votes, usernick, forum FROM thread
-    JOIN (SELECT slug as forum, id as fid FROM forum) as forum_t ON forum_t.fid = thread.forumid;
+CREATE INDEX thread_createdtitle_idx ON thread (created, title);
+CREATE INDEX thread_forumslug_idx ON thread (forumslug);
 
 DROP SEQUENCE IF EXISTS post_id;
 CREATE SEQUENCE post_id START 1;
@@ -109,27 +82,20 @@ CREATE TABLE post (
     parent int DEFAULT 0,
     path BIGINT[] NOT NULL,
     isEdited boolean DEFAULT false,
-    forumid int NOT NULL,
+    forumslug citext NOT NULL,
     usernick citext NOT NULL,
-    threadid int NOT NULL,
-    FOREIGN KEY (usernick) REFERENCES forum_user (nickname),
-    FOREIGN KEY (forumid) REFERENCES forum (id),
-    FOREIGN KEY (threadid) REFERENCES thread (id)
+    threadid int NOT NULL
 );
 
 CREATE INDEX post_path_desc ON post (path DESC, id);
 CREATE INDEX post_path ON post (path);
 CREATE INDEX post_level ON post (array_length(path, 1));
-CREATE INDEX post_forumid_idx ON post (forumid);
+CREATE INDEX post_forumslug_idx ON post (forumslug);
 
 CREATE TABLE votes (
-    id SERIAL NOT NULL PRIMARY KEY,
-    userid int NOT NULL ,
+    usernick citext NOT NULL,
     vote int DEFAULT 0,
-    threadid int NOT NULL ,
-    FOREIGN KEY (userid) REFERENCES forum_user (id),
-    FOREIGN KEY (threadid) REFERENCES thread (id)
+    threadid int NOT NULL
 );
 
-CREATE INDEX votes_thread_idx ON votes (userid);
-CREATE INDEX votes_user_idx ON votes (threadid);
+CREATE INDEX votes_user_thread_idx ON votes (usernick, threadid);

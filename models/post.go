@@ -42,11 +42,10 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 		return postsFound, err
 	}
 	var actualId int
-	var forumId int
 	var forumSlug string
 	if thread.Id != 0 {
-		rows := transaction.QueryRow("SELECT id, forumid FROM thread WHERE id = $1", thread.Id)
-		err = rows.Scan(&actualId, &forumId)
+		rows := transaction.QueryRow("SELECT id, forumslug FROM thread WHERE id = $1", thread.Id)
+		err = rows.Scan(&actualId, &forumSlug)
 		if err != nil {
 			err = transaction.Rollback()
 			if err != nil {
@@ -55,8 +54,8 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 			return postsFound, fmt.Errorf("can't find thread with id %d", thread.Id)
 		}
 	} else {
-		rows := transaction.QueryRow("SELECT id, forumid FROM thread WHERE slug = $1", thread.Slug)
-		err = rows.Scan(&actualId, &forumId)
+		rows := transaction.QueryRow("SELECT id, forumslug FROM thread WHERE slug = $1", thread.Slug)
+		err = rows.Scan(&actualId, &forumSlug)
 		if err != nil {
 			err = transaction.Rollback()
 			if err != nil {
@@ -65,16 +64,6 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 			return postsFound, fmt.Errorf("can't find thread with slug %s", thread.Slug)
 		}
 		thread.Id = actualId
-	}
-
-	row := transaction.QueryRow("SELECT slug FROM forum WHERE id = $1", forumId)
-	err = row.Scan(&forumSlug)
-	if err != nil {
-		errRollback := transaction.Rollback()
-		if errRollback != nil {
-			log.Fatalln(errRollback)
-		}
-		return postsFound, err
 	}
 
 	var rows *pgx.Rows
@@ -257,8 +246,7 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 	return postsFound, nil
 }
 
-func (post *Post) GetPost() (error, string, int) {
-	var forumId int
+func (post *Post) GetPost() (error, string, string) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
@@ -267,40 +255,30 @@ func (post *Post) GetPost() (error, string, int) {
 		if errRollback != nil {
 			log.Println(errRollback)
 		}
-		return err, post.User, forumId
+		return err, post.User, post.Forum
 	}
-	rows := transaction.QueryRow("SELECT id, message, created, parent, isEdited, usernick, threadid, forumid FROM post WHERE id = $1", post.Id)
-	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.Edited, &post.User, &post.Thread, &forumId)
+	rows := transaction.QueryRow("SELECT id, message, created, parent, isEdited, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
+	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.Edited, &post.User, &post.Thread, &post.Forum)
 	if err != nil {
 		log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Println(errRollback)
 		}
-		return fmt.Errorf("can't find post with id %d", post.Id), post.User, forumId
-	}
-	rows = transaction.QueryRow("SELECT slug FROM forum WHERE id = $1", forumId)
-	err = rows.Scan(&post.Forum)
-	if err != nil {
-		log.Println(err)
-		errRollback := transaction.Rollback()
-		if errRollback != nil {
-			log.Println(errRollback)
-		}
-		return fmt.Errorf("can't find forum with id %d", forumId), post.User, forumId
+		return fmt.Errorf("can't find post with id %d", post.Id), post.User, post.Forum
 	}
 	err = transaction.Commit()
 	if err != nil {
 		log.Fatalln(err)
 	}
-	return nil, post.User, forumId
+	return nil, post.User, post.Forum
 }
 
 
 func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 	var relatedPost PostRelated
 	var userStr string
-	var forumId int
+	var forumSlug string
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
@@ -311,7 +289,7 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		}
 		return relatedPost, err
 	}
-	err, userStr, forumId = post.GetPost()
+	err, userStr, forumSlug = post.GetPost()
 	if err != nil {
 		log.Println(err)
 		errRollback := transaction.Rollback()
@@ -337,6 +315,17 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		relatedPost.User = &newUser
 	}
 	if strings.Contains(related, "forum") {
+		rows := transaction.QueryRow("SELECT id FROM forum WHERE slug = $1", forumSlug)
+		var forumId int
+		err = rows.Scan(&forumId)
+		if err != nil || forumId == 0 {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return relatedPost, fmt.Errorf("can't find forum ")
+		}
 		var newForum Forum
 		newForum.Id = forumId
 		err = newForum.GetForum(post.Forum)
@@ -375,7 +364,6 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 
 
 func (post *Post) UpdatePost() error {
-	var forumId int
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
@@ -405,18 +393,8 @@ func (post *Post) UpdatePost() error {
 		}
 		post.Edited = true
 	}
-	rows = transaction.QueryRow("SELECT id, message, created, parent, usernick, threadid, forumid FROM post WHERE id = $1", post.Id)
-	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.User, &post.Thread, &forumId)
-	if err != nil {
-		log.Println(err)
-		errRollback := transaction.Rollback()
-		if errRollback != nil {
-			log.Println(errRollback)
-		}
-		return err
-	}
-	rows = transaction.QueryRow("SELECT slug FROM forum WHERE id = $1", forumId)
-	err = rows.Scan(&post.Forum)
+	rows = transaction.QueryRow("SELECT id, message, created, parent, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
+	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.User, &post.Thread, &post.Forum)
 	if err != nil {
 		log.Println(err)
 		errRollback := transaction.Rollback()

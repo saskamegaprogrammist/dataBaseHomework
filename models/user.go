@@ -205,8 +205,8 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 		return usersFound, err
 	}
 	var forumId int
-	row := transaction.QueryRow("SELECT id FROM forum WHERE slug = $1", forumSlug)
-	err = row.Scan(&forumId)
+	row := transaction.QueryRow("SELECT id, slug FROM forum WHERE slug = $1", forumSlug)
+	err = row.Scan(&forumId, &forumSlug)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -218,9 +218,9 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 
 	sqlSelect := "SELECT DISTINCT ON (nickname COLLATE \"C\") about, fullname, nickname, email FROM forum_user " +
 					"JOIN (SELECT COALESCE(p_usernick, t_usernick) as merge_nick FROM ( " +
-							"SELECT DISTINCT usernick as p_usernick FROM post WHERE forumid = $1) as p " +
+							"SELECT DISTINCT usernick as p_usernick FROM post WHERE forumslug = $1) as p " +
 							"FULL OUTER JOIN ( " +
-								"SELECT DISTINCT usernick as t_usernick  FROM thread WHERE forumid = $1) " +
+								"SELECT DISTINCT usernick as t_usernick  FROM thread WHERE forumslug = $1) " +
 							"as t ON p.p_usernick = t.t_usernick) " +
 					"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
@@ -228,29 +228,29 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 	if params.Decs {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  < $2 ORDER BY (nickname COLLATE \"C\") DESC LIMIT $3", forumId, params.Since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  < $2 ORDER BY (nickname COLLATE \"C\") DESC LIMIT $3", forumSlug, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC LIMIT $2", forumId, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\" < $2 ORDER BY (nickname COLLATE \"C\") DESC", forumId, params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\" < $2 ORDER BY (nickname COLLATE \"C\") DESC", forumSlug, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC", forumId)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC", forumSlug)
 			}
 		}
 	} else {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") LIMIT $3", forumId, params.Since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") LIMIT $3", forumSlug, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") LIMIT $2", forumId, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") ", forumId, params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") ", forumSlug, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") ", forumId)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") ", forumSlug)
 			}
 		}
 	}

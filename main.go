@@ -10,8 +10,8 @@ import (
 
 
 func main() {
-	utils.CreateDataBaseConnection("docker", "docker", "localhost", "docker", 20);
-	//utils.CreateDataBaseConnection("postgres", "1", "localhost", "project_techno_real", 20);
+	//utils.CreateDataBaseConnection("docker", "docker", "localhost", "docker", 20);
+	utils.CreateDataBaseConnection("postgres", "1", "localhost", "project_techno_real", 20);
 	utils.InitDataBase();
 
 	r := mux.NewRouter()
