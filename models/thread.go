@@ -381,30 +381,17 @@ func (thread *Thread) UpdateThread() error  {
 		}
 		thread.Id = actualId
 	}
-	if thread.Message != "" {
-		_, err = transaction.Exec("UPDATE thread SET message = $2 WHERE id = $1",  thread.Id, thread.Message)
+	_, err = transaction.Exec("UPDATE thread SET message = coalesce(nullif($2, ''), message), title = coalesce(nullif($3, ''), title) WHERE id = $1",  thread.Id, thread.Message, thread.Title)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
 		if err != nil {
-			log.Println(err)
-			err = transaction.Rollback()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			return err
+			log.Fatalln(err)
 		}
+		return err
 	}
-	if thread.Title != "" {
-		_, err = transaction.Exec("UPDATE thread SET title = $2 WHERE id = $1",  thread.Id, thread.Title)
-		if err != nil {
-			log.Println(err)
-			err = transaction.Rollback()
-			if err != nil {
-				log.Fatalln(err)
-			}
-			return err
-		}
-	}
-	rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forumslug FROM thread WHERE id = $1",  thread.Id)
-	err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
+	rows := transaction.QueryRow("SELECT * FROM thread WHERE id = $1",  thread.Id)
+	err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 	if err != nil {
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
