@@ -284,7 +284,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			newPosts[j].Forum = thread.Forum
 			j++
 		}
-		_, err = transaction.Exec("UPDATE forum SET posts = posts + $1 WHERE forum.slug = $2 ",  len(newPosts), forumSlug)
+		_, err = transaction.Exec("UPDATE forum SET posts = posts + $1 WHERE slug = $2 ",  len(newPosts), forumSlug)
 		if err != nil {
 			log.Println(err)
 			err = transaction.Rollback()

@@ -86,9 +86,9 @@ CREATE TABLE post (
     usernick citext NOT NULL,
     threadid int NOT NULL
 );
-
-CREATE INDEX post_path_desc ON post (path DESC, id);
+CREATE INDEX post_thread_idx ON post (id, threadid);
 CREATE INDEX post_path ON post (path);
+CREATE INDEX post_created ON post (created);
 CREATE INDEX post_level ON post (array_length(path, 1));
 CREATE INDEX post_forumslug_idx ON post (forumslug);
 
