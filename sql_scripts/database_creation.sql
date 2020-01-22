@@ -86,10 +86,11 @@ CREATE TABLE post (
     usernick citext NOT NULL,
     threadid int NOT NULL
 );
+
 CREATE INDEX post_thread_idx ON post (threadid, id);
 CREATE INDEX post_path ON post (threadid, path);
 CREATE INDEX post_created ON post (threadid, created);
-CREATE INDEX post_level ON post (threadid, array_length(path, 1));
+--CREATE INDEX post_level ON post (threadid, array_length(path, 1));
 CREATE INDEX post_user_forum_idx ON post (usernick, forumslug);
 
 CREATE TABLE votes (

@@ -356,10 +356,9 @@ func (post *Post) UpdatePost() error {
 	if err != nil {
 		log.Println(err)
 	}
-	var postExists int
-	var messageExists string
-	rows := transaction.QueryRow("SELECT id, message FROM post WHERE id = $1", post.Id)
-	err = rows.Scan(&postExists, &messageExists)
+	newMessage := post.Message
+	rows := transaction.QueryRow("SELECT id, created, parent, isEdited, message, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
+	err = rows.Scan(&post.Id, &post.Date, &post.Parent, &post.Edited, &post.Message, &post.User, &post.Thread, &post.Forum)
 	if err != nil {
 		log.Println(err)
 		errRollback := transaction.Rollback()
@@ -368,8 +367,10 @@ func (post *Post) UpdatePost() error {
 		}
 		return fmt.Errorf("can't find post with id %d", post.Id)
 	}
-	if post.Message != "" && post.Message != messageExists {
-		_, err = transaction.Exec("UPDATE post SET (message, isedited) = ($2, true) WHERE id = $1 ",  post.Id, post.Message)
+	if len(newMessage) != 0 {
+		rows = transaction.QueryRow("UPDATE post SET (message, isedited) = (coalesce($2, message), $2 IS NOT NULL AND $2 <> message) " +
+			"WHERE id = $1 RETURNING message, isedited", post.Id, newMessage)
+		err = rows.Scan(&post.Message, &post.Edited)
 		if err != nil {
 			log.Println(err)
 			err = transaction.Rollback()
@@ -378,17 +379,6 @@ func (post *Post) UpdatePost() error {
 			}
 			return err
 		}
-		post.Edited = true
-	}
-	rows = transaction.QueryRow("SELECT id, message, created, parent, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
-	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.User, &post.Thread, &post.Forum)
-	if err != nil {
-		log.Println(err)
-		errRollback := transaction.Rollback()
-		if errRollback != nil {
-			log.Println(errRollback)
-		}
-		return err
 	}
 	err = transaction.Commit()
 	if err != nil {

@@ -95,7 +95,7 @@ CREATE INDEX forum_slug_idx ON forum (slug);
 CREATE TABLE thread (
     id SERIAL NOT NULL PRIMARY KEY,
     slug citext NOT NULL,
-    created TIMESTAMPTZ(9),
+    created TIMESTAMPTZ,
     title varchar(100) NOT NULL,
     message text NOT NULL,
     votes int DEFAULT 0,
@@ -104,7 +104,7 @@ CREATE TABLE thread (
 --     CONSTRAINT valid_slug_thread CHECK (slug ~* '^(\d|\w|-|_)*(\w|-|_)(\d|\w|-|_)*$')
 );
 CREATE INDEX thread_slug ON thread(slug);
-CREATE INDEX thread_forumslug_idx ON thread (forumslug);
+CREATE INDEX thread_user_forum_idx ON thread (usernick, forumslug);
 
 DROP SEQUENCE IF EXISTS post_id;
 CREATE SEQUENCE post_id START 1;
@@ -112,7 +112,7 @@ CREATE SEQUENCE post_id START 1;
 CREATE TABLE post (
     id SERIAL NOT NULL PRIMARY KEY,
     message text NOT NULL,
-    created TIMESTAMPTZ(9), 
+    created TIMESTAMPTZ,
     parent int DEFAULT 0,
     path BIGINT[] NOT NULL,
     isEdited boolean DEFAULT false,
@@ -120,11 +120,12 @@ CREATE TABLE post (
     usernick citext NOT NULL,
     threadid int NOT NULL
 );
+
 CREATE INDEX post_thread_idx ON post (threadid, id);
 CREATE INDEX post_path ON post (threadid, path);
 CREATE INDEX post_created ON post (threadid, created);
-CREATE INDEX post_level ON post (threadid, array_length(path, 1));
-CREATE INDEX post_forumslug_idx ON post (forumslug);
+--CREATE INDEX post_level ON post (threadid, array_length(path, 1));
+CREATE INDEX post_user_forum_idx ON post (usernick, forumslug);
 
 CREATE TABLE votes (
     usernick citext NOT NULL,

@@ -124,9 +124,8 @@ func (user *User) UpdateUser() (error, int) {
 	if err != nil {
 		log.Println(err)
 	}
-	var userExistsId int
 	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", user.Nickname)
-	err = rows.Scan(&userExistsId)
+	err = rows.Scan(&user.Id)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -135,8 +134,10 @@ func (user *User) UpdateUser() (error, int) {
 		}
 		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 1
 	}
-	_, err = transaction.Exec("UPDATE forum_user SET email = coalesce(nullif($2, ''), email)," +
-			" about = coalesce(nullif($3, ''), about), fullname = coalesce(nullif($4, ''), fullname) WHERE nickname = $1",  user.Nickname, user.Email, user.About, user.Fullname)
+	rows = transaction.QueryRow("UPDATE forum_user SET email = coalesce(nullif($2, ''), email)," +
+			" about = coalesce(nullif($3, ''), about), fullname = coalesce(nullif($4, ''), fullname)" +
+		"WHERE nickname = $1 RETURNING email, fullname, about",  user.Nickname, user.Email, user.About, user.Fullname)
+	err = rows.Scan(&user.Email, &user.Fullname, &user.About)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -144,17 +145,6 @@ func (user *User) UpdateUser() (error, int) {
 			log.Fatalln(err)
 		}
 		return fmt.Errorf("email exists %s", user.Email), 2
-	}
-
-	rows = transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
-	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
-	if err != nil {
-		log.Println(err)
-		err = transaction.Rollback()
-		if err != nil {
-			log.Fatalln(err)
-		}
-		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 2
 	}
 	err = transaction.Commit()
 	if err != nil {
