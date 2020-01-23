@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS forum CASCADE;
 DROP TABLE IF EXISTS post CASCADE;
 DROP TABLE IF EXISTS thread CASCADE;
 DROP TABLE IF EXISTS votes CASCADE;
+DROP TABLE IF EXISTS forum_user_new CASCADE;
 
 CREATE TABLE forum_user (
     id SERIAL NOT NULL PRIMARY KEY,
@@ -100,3 +101,10 @@ CREATE TABLE votes (
 );
 
 CREATE INDEX votes_user_thread_idx ON votes (usernick, threadid);
+
+CREATE TABLE forum_user_new (
+    usernick citext NOT NULL ,
+    forumslug citext NOT NULL
+);
+
+CREATE INDEX forum_user_forum_idx ON forum_user_new (usernick, forumslug);

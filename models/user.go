@@ -177,12 +177,9 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 		return usersFound, fmt.Errorf("can't find forum with slug %s", forumSlug)
 	}
 
-	sqlSelect := "SELECT DISTINCT ON (nickname COLLATE \"C\") about, fullname, nickname, email FROM forum_user " +
-					"JOIN (SELECT COALESCE(p_usernick, t_usernick) as merge_nick FROM ( " +
-							"SELECT DISTINCT usernick as p_usernick FROM post WHERE forumslug = $1) as p " +
-							"FULL OUTER JOIN ( " +
-								"SELECT DISTINCT usernick as t_usernick  FROM thread WHERE forumslug = $1) " +
-							"as t ON p.p_usernick = t.t_usernick) " +
+	sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
+					"JOIN (SELECT usernick as merge_nick FROM forum_user_new " +
+							"WHERE forumslug = $1 ) " +
 					"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
 

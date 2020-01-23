@@ -79,6 +79,16 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		}
 		return threadExists, err
 	}
+	_, err = transaction.Exec("INSERT INTO forum_user_new (usernick, forumslug) SELECT $1, $2 WHERE NOT EXISTS" +
+		"(SELECT 1 FROM forum_user_new WHERE usernick = $1 AND forumslug = $2) ", thread.User, thread.Forum)
+	if err != nil {
+		log.Println(err)
+		err = transaction.Rollback()
+		if err != nil {
+			log.Fatalln(err)
+		}
+		return threadExists, err
+	}
 	_, err = transaction.Exec("UPDATE forum SET threads = threads + 1 WHERE forum.slug = $1 ", thread.Forum)
 	if err != nil {
 		log.Println(err)
@@ -254,6 +264,18 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 				}
 			}
 
+			_, err = transaction.Exec("INSERT INTO forum_user_new (usernick, forumslug) SELECT $1, $2 WHERE NOT EXISTS " +
+				"(SELECT 1 FROM forum_user_new WHERE usernick = $1 AND forumslug = $2) ",  newPosts[i].User, forumSlug)
+			fmt.Println(newPosts[i].User, forumSlug)
+			if err != nil {
+				log.Println(err)
+				err = transaction.Rollback()
+				if err != nil {
+					log.Fatalln(err)
+				}
+				return newPosts, err, 2
+			}
+
 			query += " (?, ?, ?, ?, ?, ?, (SELECT path FROM post WHERE id = ?) || (select nextval('post_id')::BIGINT)),"
 			vals = append(vals, newPosts[i].User, forumSlug, timeNow, newPosts[i].Parent, newPosts[i].Message, thread.Id, newPosts[i].Parent)
 
@@ -293,6 +315,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			}
 			return newPosts, err, 2
 		}
+
 	}
 	err = transaction.Commit()
 	if err != nil {
