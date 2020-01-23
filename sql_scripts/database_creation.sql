@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS forum_user_new CASCADE;
 
 CREATE TABLE forum_user (
     id SERIAL NOT NULL PRIMARY KEY,
-    nickname citext NOT NULL UNIQUE,
+    nickname citext COLLATE "C" NOT NULL UNIQUE,
     email citext NOT NULL UNIQUE,
     fullname varchar(100) NOT NULL,
     about text
@@ -19,7 +19,6 @@ CREATE TABLE forum_user (
 );
 
 CREATE INDEX forum_user_nickname_idx ON forum_user (nickname);
-CREATE INDEX forum_user_nickname_collate_idx ON forum_user (nickname COLLATE "C");
 CREATE INDEX forum_user_email_idx ON forum_user (email);
 
 CREATE OR REPLACE FUNCTION check_email() RETURNS TRIGGER

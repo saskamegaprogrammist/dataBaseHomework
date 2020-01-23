@@ -173,29 +173,29 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 	if params.Decs {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  < $2 ORDER BY (nickname COLLATE \"C\") DESC LIMIT $3", forumSlug, params.Since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   < $2 ORDER BY (nickname ) DESC LIMIT $3", forumSlug, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC LIMIT $2", forumSlug, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\" < $2 ORDER BY (nickname COLLATE \"C\") DESC", forumSlug, params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname  < $2 ORDER BY (nickname ) DESC", forumSlug, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") DESC", forumSlug)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC", forumSlug)
 			}
 		}
 	} else {
 		if params.Limit != -1 {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") LIMIT $3", forumSlug, params.Since, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) LIMIT $3", forumSlug, params.Since, params.Limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") LIMIT $2", forumSlug, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) LIMIT $2", forumSlug, params.Limit)
 			}
 		} else {
 			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname COLLATE \"C\"  > $2 ORDER BY (nickname COLLATE \"C\") ", forumSlug, params.Since)
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) ", forumSlug, params.Since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname COLLATE \"C\") ", forumSlug)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) ", forumSlug)
 			}
 		}
 	}

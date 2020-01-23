@@ -41,11 +41,10 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 		}
 		return postsFound, err
 	}
-	var actualId int
 	var forumSlug string
 	if thread.Id != 0 {
-		rows := transaction.QueryRow("SELECT id, forumslug FROM thread WHERE id = $1", thread.Id)
-		err = rows.Scan(&actualId, &forumSlug)
+		rows := transaction.QueryRow("SELECT forumslug FROM thread WHERE id = $1", thread.Id)
+		err = rows.Scan(&forumSlug)
 		if err != nil {
 			err = transaction.Rollback()
 			if err != nil {
@@ -55,7 +54,7 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 		}
 	} else {
 		rows := transaction.QueryRow("SELECT id, forumslug FROM thread WHERE slug = $1", thread.Slug)
-		err = rows.Scan(&actualId, &forumSlug)
+		err = rows.Scan(&thread.Id, &forumSlug)
 		if err != nil {
 			err = transaction.Rollback()
 			if err != nil {
@@ -63,7 +62,6 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 			}
 			return postsFound, fmt.Errorf("can't find thread with slug %s", thread.Slug)
 		}
-		thread.Id = actualId
 	}
 
 	var rows *pgx.Rows
