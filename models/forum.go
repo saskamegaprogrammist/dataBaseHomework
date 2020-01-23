@@ -20,7 +20,7 @@ func (forum *Forum) CreateForum() (Forum, error) {
 	transaction, err := dataBase.Begin()
 	var forumExists Forum
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -31,7 +31,7 @@ func (forum *Forum) CreateForum() (Forum, error) {
 	var userId int
 	err = rows.Scan(&userId, &forum.User)
 	if err != nil || userId == 0 {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -48,7 +48,7 @@ func (forum *Forum) CreateForum() (Forum, error) {
 		forum.Slug, forum.Title, forum.User)
 	err = rows.Scan(&forum.Id, &forum.Slug)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -66,7 +66,7 @@ func (forum *Forum) GetForum(forumSlug string) error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -76,7 +76,7 @@ func (forum *Forum) GetForum(forumSlug string) error {
 	rows := transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forumSlug)
 	err = rows.Scan(&forum.Id, &forum.Slug, &forum.Title, &forum.Posts, &forum.Threads, &forum.User)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -85,7 +85,7 @@ func (forum *Forum) GetForum(forumSlug string) error {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)

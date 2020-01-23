@@ -34,7 +34,7 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if err != nil {
 			log.Fatalln(errRollback)
@@ -221,7 +221,7 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 	}
 
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -232,10 +232,10 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 		var postFound Post
 		err = rows.Scan(&postFound.Id, &postFound.Message, &postFound.Date, &postFound.Parent, &postFound.Edited, &postFound.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			errRollback := transaction.Rollback()
 			if err != nil {
-				log.Println(errRollback)
+				//log.Println(errRollback)
 			}
 			return postsFound, err
 		}
@@ -254,20 +254,20 @@ func (post *Post) GetPost() (error, string, string) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
-			log.Println(errRollback)
+			//log.Println(errRollback)
 		}
 		return err, post.User, post.Forum
 	}
 	rows := transaction.QueryRow("SELECT id, message, created, parent, isEdited, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
 	err = rows.Scan(&post.Id, &post.Message, &post.Date, &post.Parent, &post.Edited, &post.User, &post.Thread, &post.Forum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
-			log.Println(errRollback)
+			//log.Println(errRollback)
 		}
 		return fmt.Errorf("can't find post with id %d", post.Id), post.User, post.Forum
 	}
@@ -286,19 +286,19 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
-			log.Println(errRollback)
+			//log.Println(errRollback)
 		}
 		return relatedPost, err
 	}
 	err, userStr, forumSlug = post.GetPost()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
-			log.Println(errRollback)
+			//log.Println(errRollback)
 		}
 		return relatedPost, err
 	}
@@ -309,10 +309,10 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", newUser.Nickname)
 		err = rows.Scan(&newUser.Id, &newUser.Nickname, &newUser.Email, &newUser.Fullname, &newUser.About)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			errRollback := transaction.Rollback()
 			if errRollback != nil {
-				log.Println(errRollback)
+				//log.Println(errRollback)
 			}
 			return relatedPost, err
 		}
@@ -323,7 +323,7 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		rows := transaction.QueryRow("SELECT * FROM forum WHERE slug = $1", forumSlug)
 		err = rows.Scan(&newForum.Id, &newForum.Slug, &newForum.Title, &newForum.Posts, &newForum.Threads, &newForum.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -337,7 +337,7 @@ func (post *Post) GetPostRelated(related string) (PostRelated, error) {
 		rows := transaction.QueryRow("SELECT * FROM thread WHERE id = $1", post.Thread)
 		err = rows.Scan(&newThread.Id, &newThread.Slug, &newThread.Date, &newThread.Title, &newThread.Message, &newThread.Votes,  &newThread.Forum, &newThread.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -360,13 +360,13 @@ func (post *Post) UpdatePost() error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	newMessage := post.Message
 	rows := transaction.QueryRow("SELECT id, created, parent, isEdited, message, usernick, threadid, forumslug FROM post WHERE id = $1", post.Id)
 	err = rows.Scan(&post.Id, &post.Date, &post.Parent, &post.Edited, &post.Message, &post.User, &post.Thread, &post.Forum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -378,7 +378,7 @@ func (post *Post) UpdatePost() error {
 			"WHERE id = $1 RETURNING message, isedited", post.Id, newMessage)
 		err = rows.Scan(&post.Message, &post.Edited)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)

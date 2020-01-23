@@ -24,7 +24,7 @@ func CreateUser(writer http.ResponseWriter, req *http.Request) {
 	var newUser models.User
 	err := json.NewDecoder(req.Body).Decode(&newUser)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
@@ -32,7 +32,7 @@ func CreateUser(writer http.ResponseWriter, req *http.Request) {
 	newUser.Nickname = userNickname
 	usersExisting, err := newUser.CreateUser()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("internal error"))
 		return
 	}
@@ -49,13 +49,13 @@ func UpdateUser (writer http.ResponseWriter, req *http.Request) {
 	newUser.Nickname = userNickname
 	err := json.NewDecoder(req.Body).Decode(&newUser)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
 	err, code := newUser.UpdateUser()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		switch code {
 		case 1:
 			utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))

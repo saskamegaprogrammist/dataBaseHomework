@@ -16,7 +16,7 @@ func (db *DB) GetStatus() error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -26,7 +26,7 @@ func (db *DB) GetStatus() error {
 	rows := transaction.QueryRow("SELECT COUNT(*) FROM forum")
 	err = rows.Scan(&db.Forum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -36,7 +36,7 @@ func (db *DB) GetStatus() error {
 	rows = transaction.QueryRow("SELECT COUNT(*) FROM forum_user ")
 	err = rows.Scan(&db.User)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -46,7 +46,7 @@ func (db *DB) GetStatus() error {
 	rows = transaction.QueryRow("SELECT COUNT(*) FROM thread ")
 	err = rows.Scan(&db.Thread)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -56,7 +56,7 @@ func (db *DB) GetStatus() error {
 	rows = transaction.QueryRow("SELECT COUNT(*) FROM post ")
 	err = rows.Scan(&db.Post)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -74,7 +74,7 @@ func (db *DB) Clear() error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -83,7 +83,7 @@ func (db *DB) Clear() error {
 	}
 	_, err = transaction.Exec(`DELETE FROM votes;`)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -97,7 +97,7 @@ func (db *DB) Clear() error {
 	//fmt.Println("votes")
 	transaction, err = dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -106,7 +106,7 @@ func (db *DB) Clear() error {
 	}
 	_, err = transaction.Exec(`DELETE FROM post;`)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -120,7 +120,7 @@ func (db *DB) Clear() error {
 	//fmt.Println("post")
 	transaction, err = dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -129,7 +129,7 @@ func (db *DB) Clear() error {
 	}
 	_, err = transaction.Exec(`DELETE FROM thread;`)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -143,7 +143,7 @@ func (db *DB) Clear() error {
 	//fmt.Println("thread")
 	transaction, err = dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -152,7 +152,7 @@ func (db *DB) Clear() error {
 	}
 	_, err = transaction.Exec(`DELETE FROM forum;`)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -166,7 +166,7 @@ func (db *DB) Clear() error {
 	//fmt.Println("forum")
 	transaction, err = dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -175,7 +175,7 @@ func (db *DB) Clear() error {
 	}
 	_, err = transaction.Exec(`DELETE FROM forum_user;`)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)

@@ -19,17 +19,17 @@ func (user *User) CreateUser() ([]User, error) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	var usersExists[] User
 	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", user.Nickname)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	var userExists User
 	err = rows.Scan(&userExists.Id, &userExists.Nickname, &userExists.Email, &userExists.Fullname, &userExists.About)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 
 	if userExists.Id != 0  {
@@ -38,11 +38,11 @@ func (user *User) CreateUser() ([]User, error) {
 	var userExistsEmail User
 	rows = transaction.QueryRow("SELECT * FROM forum_user WHERE email = $1", user.Email)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	err = rows.Scan(&userExistsEmail.Id, &userExistsEmail.Nickname, &userExistsEmail.Email, &userExistsEmail.Fullname, &userExistsEmail.About)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	if userExistsEmail.Id != 0 && userExists.Id != userExistsEmail.Id  {
 		usersExists = append(usersExists, userExistsEmail)
@@ -58,7 +58,7 @@ func (user *User) CreateUser() ([]User, error) {
 		user.Nickname, user.Email, user.Fullname, user.About)
 	err = rows.Scan(&user.Id)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -76,7 +76,7 @@ func (user *User) GetUser(userNickname string) error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -86,7 +86,7 @@ func (user *User) GetUser(userNickname string) error {
 	rows := transaction.QueryRow("SELECT * FROM forum_user WHERE nickname = $1", userNickname)
 	err = rows.Scan(&user.Id, &user.Nickname, &user.Email, &user.Fullname, &user.About)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -95,7 +95,7 @@ func (user *User) GetUser(userNickname string) error {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -109,12 +109,12 @@ func (user *User) UpdateUser() (error, int) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", user.Nickname)
 	err = rows.Scan(&user.Id)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -126,7 +126,7 @@ func (user *User) UpdateUser() (error, int) {
 		"WHERE nickname = $1 RETURNING email, fullname, about",  user.Nickname, user.Email, user.About, user.Fullname)
 	err = rows.Scan(&user.Email, &user.Fullname, &user.About)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -145,7 +145,7 @@ func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]Us
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if err != nil {
 			log.Fatalln(errRollback)
@@ -156,7 +156,7 @@ func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]Us
 	row := transaction.QueryRow("SELECT id, slug FROM forum WHERE slug = $1", forumSlug)
 	err = row.Scan(&forumId, &forumSlug)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -209,7 +209,7 @@ func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]Us
 	}
 
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -220,7 +220,7 @@ func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]Us
 		var userFound User
 		err = rows.Scan(&userFound.About, &userFound.Fullname, &userFound.Nickname, &userFound.Email)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			errRollback := transaction.Rollback()
 			if err != nil {
 				log.Fatalln(errRollback)

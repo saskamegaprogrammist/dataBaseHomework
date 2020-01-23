@@ -14,7 +14,7 @@ func GetPost(writer http.ResponseWriter, req *http.Request) {
 	var foundPost models.Post
 	postId, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	foundPost.Id = postId
 	query := req.URL.Query()
@@ -32,18 +32,18 @@ func UpdatePost(writer http.ResponseWriter, req *http.Request) {
 	var updatedPost models.Post
 	postId, err := strconv.Atoi(mux.Vars(req)["id"])
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	updatedPost.Id = postId
 	err = json.NewDecoder(req.Body).Decode(&updatedPost)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
 	err = updatedPost.UpdatePost()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
 	}

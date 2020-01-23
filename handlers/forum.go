@@ -14,7 +14,7 @@ func CreateForum(writer http.ResponseWriter, req *http.Request) {
 	var newForum models.Forum
 	err := json.NewDecoder(req.Body).Decode(&newForum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}

@@ -14,7 +14,7 @@ func CreateThread (writer http.ResponseWriter, req *http.Request) {
 	var newThread models.Thread
 	err := json.NewDecoder(req.Body).Decode(&newThread)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
@@ -46,13 +46,13 @@ func CreatePosts (writer http.ResponseWriter, req *http.Request) {
 	var newPosts [] models.Post
 	err = json.NewDecoder(req.Body).Decode(&newPosts)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
 	posts, err, code := thread.CreatePosts(newPosts)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		switch code {
 		case 1:
 			utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
@@ -94,13 +94,13 @@ func UpdateThread (writer http.ResponseWriter, req *http.Request) {
 	}
 	err = json.NewDecoder(req.Body).Decode(&updatedThread)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}
 	err = updatedThread.UpdateThread()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
 	}
@@ -153,7 +153,7 @@ func Vote(writer http.ResponseWriter, req *http.Request) {
 	}
 	err = json.NewDecoder(req.Body).Decode(&newVote)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		utils.CreateAnswer(writer, 500, models.CreateError("cannot decode json"))
 		return
 	}

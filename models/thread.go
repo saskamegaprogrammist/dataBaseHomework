@@ -25,14 +25,14 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	rows := transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", thread.User)
 	var userId int
 	var threadExists Thread
 	err = rows.Scan(&userId)
 	if err != nil || userId == 0 {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -43,7 +43,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	var forumId int
 	err = rows.Scan(&forumId, &thread.Forum)
 	if err != nil || forumId == 0 {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -53,7 +53,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	rows = transaction.QueryRow("SELECT * FROM thread WHERE (usernick, title, forumslug, message) = ($1, $2, $3, $4)",thread.User, thread.Title, thread.Forum, thread.Message)
 	err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExists.Forum, &threadExists.User)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	if threadExists.Id != 0  {
 		return threadExists, fmt.Errorf("thread exists")
@@ -62,7 +62,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		rows = transaction.QueryRow("SELECT * FROM thread WHERE slug = $1", thread.Slug)
 		err = rows.Scan(&threadExists.Id, &threadExists.Slug, &threadExists.Date, &threadExists.Title, &threadExists.Message, &threadExists.Votes, &threadExists.Forum, &threadExists.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 		}
 		if threadExists.Id != 0 {
 			return threadExists, fmt.Errorf("thread exists")
@@ -72,7 +72,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		thread.User, thread.Forum, thread.Date, thread.Slug, thread.Message, thread.Title )
 	err = rows.Scan(&thread.Id)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -81,7 +81,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	}
 	_, err = transaction.Exec("INSERT INTO forum_user_new VALUES ($1, $2) ", thread.User, thread.Forum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -90,7 +90,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	}
 	_, err = transaction.Exec("UPDATE forum SET threads = threads + 1 WHERE forum.slug = $1 ", thread.Forum)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -109,7 +109,7 @@ func GetThreadsByForum(limit int, sinceStr string, desc bool, forumSlug string) 
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -120,7 +120,7 @@ func GetThreadsByForum(limit int, sinceStr string, desc bool, forumSlug string) 
 	var forumId int
 	err = row.Scan(&forumId, &forumSlug)
 	if err != nil || forumId == 0 {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -167,13 +167,13 @@ func GetThreadsByForum(limit int, sinceStr string, desc bool, forumSlug string) 
 		}
 	}
 	if err!=nil {
-		log.Println(err)
+		//log.Println(err)
 	}
 	for rows.Next() {
 		var threadFound Thread
 		err = rows.Scan(&threadFound.Id, &threadFound.Slug, &threadFound.Date, &threadFound.Title, &threadFound.Message, &threadFound.Votes, &threadFound.Forum, &threadFound.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -194,7 +194,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -289,7 +289,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			var time time.Time
 			err = rowsMany.Scan(&newPosts[j].Id, &newPosts[j].Edited, &time)
 			if err != nil {
-				log.Println(err)
+				//log.Println(err)
 				errRollback := transaction.Rollback()
 				if errRollback != nil {
 					log.Fatalln(errRollback)
@@ -303,7 +303,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 		}
 		_, err = transaction.Exec(querySec, valsSec...)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -312,7 +312,7 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 		}
 		_, err = transaction.Exec("UPDATE forum SET posts = posts + $1 WHERE slug = $2 ",  len(newPosts), thread.Forum)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -332,7 +332,7 @@ func (thread *Thread) GetThread() error {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -343,7 +343,7 @@ func (thread *Thread) GetThread() error {
 		rows := transaction.QueryRow("SELECT * FROM thread WHERE id = $1", thread.Id)
 		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -363,7 +363,7 @@ func (thread *Thread) GetThread() error {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -377,7 +377,7 @@ func (thread *Thread) UpdateThread() error  {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -389,7 +389,7 @@ func (thread *Thread) UpdateThread() error  {
 		rows := transaction.QueryRow("SELECT id FROM thread WHERE id = $1", thread.Id)
 		err = rows.Scan(&actualId)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -412,7 +412,7 @@ func (thread *Thread) UpdateThread() error  {
 		" WHERE id = $1 RETURNING slug, created, title, message, votes, forumslug, usernick ",  thread.Id, thread.Message, thread.Title)
 	err = rows.Scan(&thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)
@@ -421,7 +421,7 @@ func (thread *Thread) UpdateThread() error  {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -436,7 +436,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -447,7 +447,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 		rows := transaction.QueryRow("SELECT id, slug, created, title, message, votes, usernick, forumslug FROM thread WHERE id = $1",  thread.Id)
 		err = rows.Scan(&thread.Id, &thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.User, &thread.Forum)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -469,7 +469,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 	rows := transaction.QueryRow("SELECT id  FROM forum_user WHERE nickname = $1", vote.Nickname)
 	err = rows.Scan(&userId)
 	if err != nil || userId == 0  {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
@@ -483,7 +483,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 		if voteExists!=vote.Voice {
 			_, err = transaction.Exec("UPDATE thread SET votes = $2 WHERE id = $1",  thread.Id, thread.Votes + vote.Voice - voteExists)
 			if err != nil {
-				log.Println(err)
+				//log.Println(err)
 				err = transaction.Rollback()
 				if err != nil {
 					log.Fatalln(err)
@@ -492,7 +492,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 			}
 			_, err = transaction.Exec("UPDATE votes SET vote = $3 WHERE usernick = $1 AND threadid = $2", vote.Nickname, thread.Id, vote.Voice)
 			if err != nil {
-				log.Println(err)
+				//log.Println(err)
 				err = transaction.Rollback()
 				if err != nil {
 					log.Fatalln(err)
@@ -505,7 +505,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 		_, err = transaction.Exec("INSERT INTO votes (usernick, vote, threadid) VALUES ($1, $2, $3)",
 			vote.Nickname, vote.Voice, thread.Id)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			errRollback := transaction.Rollback()
 			if errRollback != nil {
 				log.Fatalln(errRollback)
@@ -514,7 +514,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 		}
 		_, err = transaction.Exec("UPDATE thread SET votes = $2 WHERE id = $1",  thread.Id, thread.Votes + vote.Voice)
 		if err != nil {
-			log.Println(err)
+			//log.Println(err)
 			err = transaction.Rollback()
 			if err != nil {
 				log.Fatalln(err)
@@ -526,7 +526,7 @@ func (thread *Thread) Vote(vote *Vote) error  {
 	}
 	err = transaction.Commit()
 	if err != nil {
-		log.Println(err)
+		//log.Println(err)
 		errRollback := transaction.Rollback()
 		if errRollback != nil {
 			log.Fatalln(errRollback)
