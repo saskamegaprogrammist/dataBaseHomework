@@ -140,7 +140,7 @@ func (user *User) UpdateUser() (error, int) {
 	return nil, 0
 }
 
-func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error) {
+func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]User, error) {
 	usersFound := make([]User, 0)
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
@@ -178,30 +178,30 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 			"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
 
-	if params.Decs {
-		if params.Limit != -1 {
-			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   < $2 ORDER BY (nickname ) DESC LIMIT $3", forumSlug, params.Since, params.Limit)
+	if desc {
+		if limit != -1 {
+			if since != "" {
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   < $2 ORDER BY (nickname ) DESC LIMIT $3", forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC LIMIT $2", forumSlug, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC LIMIT $2", forumSlug, limit)
 			}
 		} else {
-			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname  < $2 ORDER BY (nickname ) DESC", forumSlug, params.Since)
+			if since != "" {
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname  < $2 ORDER BY (nickname ) DESC", forumSlug, since)
 			} else {
 				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC", forumSlug)
 			}
 		}
 	} else {
-		if params.Limit != -1 {
-			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) LIMIT $3", forumSlug, params.Since, params.Limit)
+		if limit != -1 {
+			if since != "" {
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) LIMIT $3", forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) LIMIT $2", forumSlug, params.Limit)
+				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) LIMIT $2", forumSlug, limit)
 			}
 		} else {
-			if params.Since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) ", forumSlug, params.Since)
+			if since != "" {
+				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) ", forumSlug, since)
 			} else {
 				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) ", forumSlug)
 			}

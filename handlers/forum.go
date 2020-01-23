@@ -7,6 +7,7 @@ import (
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func CreateForum(writer http.ResponseWriter, req *http.Request) {
@@ -42,12 +43,21 @@ func GetForum(writer http.ResponseWriter, req *http.Request) {
 }
 
 func GetThreadsByForum (writer http.ResponseWriter, req *http.Request) {
-	var searchParams utils.SearchParams
 	forumSlug := mux.Vars(req)["slug"]
 	query := req.URL.Query()
-	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), "")
+	limit := query.Get("limit")
+	since := query.Get("since")
+	desc := query.Get("desc")
+	limitInt := -1
+	descBool := false
+	if limit != "" {
+		limitInt, _ = strconv.Atoi(limit)
+	}
+	if desc == "true" {
+		descBool = true
+	}
 	threads := make([]models.Thread, 0)
-	threads, err := models.GetThreadsByForum(searchParams, forumSlug)
+	threads, err := models.GetThreadsByForum(limitInt, since, descBool, forumSlug)
 	if err != nil {
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
@@ -57,12 +67,21 @@ func GetThreadsByForum (writer http.ResponseWriter, req *http.Request) {
 }
 
 func GetUsersByForum (writer http.ResponseWriter, req *http.Request) {
-	var searchParams utils.SearchParams
 	users := make([]models.User, 0)
 	forumSlug := mux.Vars(req)["slug"]
 	query := req.URL.Query()
-	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), "")
-	users, err := models.GetUsersByForum(searchParams, forumSlug)
+	limit := query.Get("limit")
+	since := query.Get("since")
+	desc := query.Get("desc")
+	limitInt := -1
+	descBool := false
+	if limit != "" {
+		limitInt, _ = strconv.Atoi(limit)
+	}
+	if desc == "true" {
+		descBool = true
+	}
+	users, err := models.GetUsersByForum(limitInt, since, descBool, forumSlug)
 	if err != nil {
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return

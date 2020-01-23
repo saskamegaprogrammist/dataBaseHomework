@@ -104,7 +104,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 	return threadExists, nil
 }
 
-func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, error) {
+func GetThreadsByForum(limit int, sinceStr string, desc bool, forumSlug string) ([]Thread, error) {
 	threadsFound := make([]Thread, 0)
 	dataBase := utils.GetDataBase()
 	transaction, err := dataBase.Begin()
@@ -128,18 +128,18 @@ func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, e
 		return threadsFound, fmt.Errorf("can't find forum with slug %s", forumSlug)
 	}
 	var rows *pgx.Rows
-	since,  _ := time.Parse(time.RFC3339Nano, params.Since)
-	if params.Decs {
-		if params.Limit != -1 {
-			if params.Since != "" {
+	since,  _ := time.Parse(time.RFC3339Nano, sinceStr)
+	if desc {
+		if limit != -1 {
+			if sinceStr != "" {
 				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3", forumSlug, since, params.Limit)
+					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3", forumSlug, since, limit)
 			} else {
 				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC LIMIT $2", forumSlug, params.Limit)
+					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC LIMIT $2", forumSlug, limit)
 			}
 		} else {
-			if params.Since != "" {
+			if sinceStr != "" {
 				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC", forumSlug, since)
 			} else {
@@ -148,18 +148,18 @@ func GetThreadsByForum(params utils.SearchParams, forumSlug string) ([]Thread, e
 			}
 		}
 	} else {
-		if params.Limit != -1 {
-			if params.Since != "" {
+		if limit != -1 {
+			if sinceStr != "" {
 				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created LIMIT $3", forumSlug, since, params.Limit)
+					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created LIMIT $3", forumSlug, since, limit)
 			} else {
 				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created LIMIT $2", forumSlug, params.Limit)
+					"FROM thread WHERE forumslug =  $1 ORDER BY created LIMIT $2", forumSlug, limit)
 			}
 		} else {
-			if params.Since != "" {
+			if sinceStr != "" {
 				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created", forumSlug, since, params.Limit)
+					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created", forumSlug, since, limit)
 			} else {
 				rows, err = transaction.Query("SELECT * " +
 					"FROM thread WHERE forumslug =  $1 ORDER BY created ", forumSlug)

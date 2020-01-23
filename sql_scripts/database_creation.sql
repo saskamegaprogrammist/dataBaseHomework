@@ -87,10 +87,11 @@ CREATE TABLE post (
     threadid int NOT NULL
 );
 
-CREATE INDEX post_thread_idx ON post (threadid, id);
-CREATE INDEX post_path ON post (threadid, path);
-CREATE INDEX post_created ON post (threadid, created);
---CREATE INDEX post_level ON post (threadid, array_length(path, 1));
+CREATE INDEX IF NOT EXISTS post_thread_path_idx ON post (threadid, path);
+CREATE INDEX IF NOT EXISTS post_thread_id_idx ON post(threadid, id);
+CREATE INDEX IF NOT EXISTS post_thread_id0_idx ON post (threadid, id) WHERE parent = 0;
+CREATE INDEX IF NOT EXISTS post_thread_id_created_idx ON post (id, created, threadid);
+CREATE INDEX IF NOT EXISTS post_thread_path1_id_idx ON post (threadid, (path[1]), id);
 CREATE INDEX post_user_forum_idx ON post (usernick, forumslug);
 
 CREATE TABLE votes (

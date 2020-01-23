@@ -109,9 +109,19 @@ func UpdateThread (writer http.ResponseWriter, req *http.Request) {
 
 
 func GetPostsByThread (writer http.ResponseWriter, req *http.Request) {
-	var searchParams utils.SearchParams
 	query := req.URL.Query()
-	searchParams.CreateParams(query.Get("limit"), query.Get("since"), query.Get("desc"), query.Get("sort"))
+	limit := query.Get("limit")
+	since := query.Get("since")
+	desc := query.Get("desc")
+	sort := query.Get("sort")
+	limitInt := -1
+	descBool := false
+	if limit != "" {
+		limitInt, _ = strconv.Atoi(limit)
+	}
+	if desc == "true" {
+		descBool = true
+	}
 	var thread models.Thread
 	threadInfo := mux.Vars(req)["slug_or_id"]
 	threadId, err := strconv.Atoi(threadInfo)
@@ -122,7 +132,7 @@ func GetPostsByThread (writer http.ResponseWriter, req *http.Request) {
 	}
 
 	posts := make([]models.Post, 0)
-	posts, err = models.GetPostsByThread(searchParams, thread)
+	posts, err = models.GetPostsByThread(limitInt, since, descBool, sort, thread)
 	if err != nil {
 		utils.CreateAnswer(writer, 404, models.CreateError(err.Error()))
 		return
