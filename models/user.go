@@ -165,45 +165,37 @@ func GetUsersByForum(limit int, since string, desc bool, forumSlug string) ([]Us
 	}
 
 	//sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
-	//				"JOIN (SELECT COALESCE(p_usernick, t_usernick) as merge_nick FROM ( " +
-	//						 "SELECT DISTINCT usernick as p_usernick FROM post WHERE forumslug = $1) as p " +
-	//	"FULL OUTER JOIN ( " +
-	//	"SELECT DISTINCT usernick as t_usernick  FROM thread WHERE forumslug = $1) " +
-	//	"as t ON p.p_usernick = t.t_usernick) " +
-	//				"as u ON u.merge_nick = forum_user.nickname"
-
-	sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
-		"JOIN (SELECT DISTINCT usernick as merge_nick FROM forum_user_new "+
-			"WHERE forumslug = $1 ) " +
-			"as u ON u.merge_nick = forum_user.nickname"
+	//	"JOIN (SELECT DISTINCT usernick as merge_nick FROM forum_user_new "+
+	//		"WHERE forumslug = $1 ) " +
+	//		"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
 
 	if desc {
 		if limit != -1 {
 			if since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   < $2 ORDER BY (nickname ) DESC LIMIT $3", forumSlug, since, limit)
+				rows, err = transaction.Query(userLimitSinceDesc, forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC LIMIT $2", forumSlug, limit)
+				rows, err = transaction.Query(userLimitDesc, forumSlug, limit)
 			}
 		} else {
 			if since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname  < $2 ORDER BY (nickname ) DESC", forumSlug, since)
+				rows, err = transaction.Query(userSinceDesc, forumSlug, since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) DESC", forumSlug)
+				rows, err = transaction.Query(userDesc, forumSlug)
 			}
 		}
 	} else {
 		if limit != -1 {
 			if since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) LIMIT $3", forumSlug, since, limit)
+				rows, err = transaction.Query(userLimitSince, forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) LIMIT $2", forumSlug, limit)
+				rows, err = transaction.Query(userLimit, forumSlug, limit)
 			}
 		} else {
 			if since != "" {
-				rows, err = transaction.Query(sqlSelect+" WHERE nickname   > $2 ORDER BY (nickname ) ", forumSlug, since)
+				rows, err = transaction.Query(userSince, forumSlug, since)
 			} else {
-				rows, err = transaction.Query(sqlSelect+" ORDER BY (nickname ) ", forumSlug)
+				rows, err = transaction.Query(userSimple, forumSlug)
 			}
 		}
 	}
