@@ -72,29 +72,29 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 				since, _ := strconv.Atoi(sinceStr)
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3`, thread.Id, since, limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 ", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 `, thread.Id, since, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC ", thread.Id, since)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC `, thread.Id, since)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id ", thread.Id, since)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id `, thread.Id, since)
 					}
 				}
 			} else {
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC LIMIT $2", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC LIMIT $2`, thread.Id, limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post  WHERE threadid = $1 ORDER BY id LIMIT $2", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post  WHERE threadid = $1 ORDER BY id LIMIT $2`, thread.Id, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC", thread.Id)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC`, thread.Id)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id ", thread.Id)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id `, thread.Id)
 					}
 				}
 			}
@@ -104,37 +104,37 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 				since, _ := strconv.Atoi(sinceStr)
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 AND (path < (SELECT path FROM post WHERE id = $2)) ORDER BY path DESC LIMIT $3 ", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 AND (path < (SELECT path FROM post WHERE id = $2)) ORDER BY path DESC LIMIT $3 `, thread.Id, since, limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 AND (path > (SELECT path FROM post WHERE id = $2)) ORDER BY path LIMIT $3 ", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 AND (path > (SELECT path FROM post WHERE id = $2)) ORDER BY path LIMIT $3 `, thread.Id, since, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 AND (path < (SELECT path FROM post WHERE id = $2)) ORDER BY path DESC  ", thread.Id, since)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 AND (path < (SELECT path FROM post WHERE id = $2)) ORDER BY path DESC  `, thread.Id, since)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 AND (path > (SELECT path FROM post WHERE id = $2)) ORDER BY path  ", thread.Id, since)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 AND (path > (SELECT path FROM post WHERE id = $2)) ORDER BY path  `, thread.Id, since)
 					}
 				}
 			} else {
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 ORDER BY path DESC LIMIT $2 ", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 ORDER BY path DESC LIMIT $2 `, thread.Id, limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 ORDER BY path LIMIT $2 ", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 ORDER BY path LIMIT $2 `, thread.Id, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 ORDER BY path DESC  ", thread.Id)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							WHERE threadid = $1 ORDER BY path DESC  `, thread.Id)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
-							"WHERE threadid = $1 ORDER BY path  ", thread.Id)
+						rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post 
+							"WHERE threadid = $1 ORDER BY path  `, thread.Id)
 					}
 				}
 			}
@@ -143,45 +143,45 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 				since, _ := strconv.Atoi(sinceStr)
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( " +
-							"SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] < " +
-							"(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path DESC LIMIT $3) ORDER BY p.path[1] DESC, p.path[2:]", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( 
+							SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] < 
+							(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path DESC LIMIT $3) ORDER BY p.path[1] DESC, p.path[2:]`, thread.Id, since, limit)
 					} else {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( " +
-							"SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] > " +
-							"(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path LIMIT $3) ORDER BY p.path ", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( 
+							SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] > 
+							(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path LIMIT $3) ORDER BY p.path `, thread.Id, since, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( " +
-							"SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] < " +
-							"(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path DESC) ORDER BY p.path[1] DESC, p.path[2:]", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( 
+							SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] < 
+							(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path DESC) ORDER BY p.path[1] DESC, p.path[2:]`, thread.Id, since, limit)
 					} else {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( " +
-							"SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] > " +
-							"(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path) ORDER BY p.path ", thread.Id, since, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post p WHERE p.threadid = $1 and p.path[1] IN ( 
+							SELECT p2.path[1] FROM post p2 WHERE p2.threadid = $1 AND p2.parent = 0 and p2.path[1] > 
+							(SELECT p3.path[1] from post p3 where p3.id = $2) ORDER BY p2.path) ORDER BY p.path `, thread.Id, since, limit)
 					}
 				}
 			} else {
 				if limit != -1 {
 					if desc {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( " +
-							"SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] " +
-							"ORDER BY path[1] DESC LIMIT $2) ORDER BY path[1] DESC, path", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( 
+							SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] 
+							ORDER BY path[1] DESC LIMIT $2) ORDER BY path[1] DESC, path`, thread.Id, limit)
 					} else {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( " +
-							"SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] " +
-							"ORDER BY path[1] LIMIT $2) ORDER BY path", thread.Id, limit)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( 
+							SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] 
+							ORDER BY path[1] LIMIT $2) ORDER BY path`, thread.Id, limit)
 					}
 				} else {
 					if desc {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( " +
-							"SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] " +
-							"ORDER BY path[1] DESC) ORDER BY path[1] DESC, path", thread.Id)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( 
+							SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] 
+							ORDER BY path[1] DESC) ORDER BY path[1] DESC, path`, thread.Id)
 					} else {
-						rows, err = transaction.Query("SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( " +
-							"SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] " +
-							"ORDER BY path[1]) ORDER BY path", thread.Id)
+						rows, err = transaction.Query(`SELECT  id, message, created, parent, isEdited, usernick  FROM post WHERE threadid = $1 and path[1] IN ( 
+							SELECT path[1] FROM post WHERE threadid = $1 GROUP BY path[1] 
+							ORDER BY path[1]) ORDER BY path`, thread.Id)
 					}
 				}
 			}
@@ -192,29 +192,29 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 			since, _ := strconv.Atoi(sinceStr)
 			if limit != -1 {
 				if desc {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3 ", thread.Id, since, limit)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3 `, thread.Id, since, limit)
 				} else {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 ", thread.Id, since, limit)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 `, thread.Id, since, limit)
 				}
 			} else {
 				if desc {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id < $2 ORDER BY id DESC ", thread.Id, since)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id < $2 ORDER BY id DESC `, thread.Id, since)
 				} else {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id ", thread.Id, since)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id `, thread.Id, since)
 				}
 			}
 		} else {
 			if limit != -1 {
 				if desc {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC LIMIT $2 ", thread.Id, limit)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC LIMIT $2 `, thread.Id, limit)
 				} else {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1  ORDER BY id LIMIT $2 ", thread.Id, limit)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1  ORDER BY id LIMIT $2 `, thread.Id, limit)
 				}
 			} else {
 				if desc {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC ", thread.Id)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC `, thread.Id)
 				} else {
-					rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id ", thread.Id)
+					rows, err = transaction.Query(`SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id `, thread.Id)
 				}
 			}
 		}
@@ -374,8 +374,8 @@ func (post *Post) UpdatePost() error {
 		return fmt.Errorf("can't find post with id %d", post.Id)
 	}
 	if len(newMessage) != 0 {
-		rows = transaction.QueryRow("UPDATE post SET (message, isedited) = (coalesce($2, message), $2 IS NOT NULL AND $2 <> message) " +
-			"WHERE id = $1 RETURNING message, isedited", post.Id, newMessage)
+		rows = transaction.QueryRow(`UPDATE post SET (message, isedited) = (coalesce($2, message), $2 IS NOT NULL AND $2 <> message) 
+			WHERE id = $1 RETURNING message, isedited`, post.Id, newMessage)
 		err = rows.Scan(&post.Message, &post.Edited)
 		if err != nil {
 			//log.Println(err)

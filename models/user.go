@@ -121,9 +121,9 @@ func (user *User) UpdateUser() (error, int) {
 		}
 		return fmt.Errorf("can't find user with nickname %s", user.Nickname), 1
 	}
-	rows = transaction.QueryRow("UPDATE forum_user SET email = coalesce(nullif($2, ''), email)," +
-			" about = coalesce(nullif($3, ''), about), fullname = coalesce(nullif($4, ''), fullname)" +
-		"WHERE nickname = $1 RETURNING email, fullname, about",  user.Nickname, user.Email, user.About, user.Fullname)
+	rows = transaction.QueryRow(`UPDATE forum_user SET email = coalesce(nullif($2, ''), email), 
+			 about = coalesce(nullif($3, ''), about), fullname = coalesce(nullif($4, ''), fullname) 
+		WHERE nickname = $1 RETURNING email, fullname, about`,  user.Nickname, user.Email, user.About, user.Fullname)
 	err = rows.Scan(&user.Email, &user.Fullname, &user.About)
 	if err != nil {
 		//log.Println(err)

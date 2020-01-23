@@ -132,37 +132,37 @@ func GetThreadsByForum(limit int, sinceStr string, desc bool, forumSlug string) 
 	if desc {
 		if limit != -1 {
 			if sinceStr != "" {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3", forumSlug, since, limit)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC LIMIT $3`, forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC LIMIT $2", forumSlug, limit)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 ORDER BY created DESC LIMIT $2`, forumSlug, limit)
 			}
 		} else {
 			if sinceStr != "" {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC", forumSlug, since)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 AND created <= $2 ORDER BY created DESC`, forumSlug, since)
 			} else {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created DESC  ", forumSlug)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 ORDER BY created DESC  `, forumSlug)
 			}
 		}
 	} else {
 		if limit != -1 {
 			if sinceStr != "" {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created LIMIT $3", forumSlug, since, limit)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created LIMIT $3`, forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created LIMIT $2", forumSlug, limit)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 ORDER BY created LIMIT $2`, forumSlug, limit)
 			}
 		} else {
 			if sinceStr != "" {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created", forumSlug, since, limit)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 AND created >= $2 ORDER BY created`, forumSlug, since, limit)
 			} else {
-				rows, err = transaction.Query("SELECT * " +
-					"FROM thread WHERE forumslug =  $1 ORDER BY created ", forumSlug)
+				rows, err = transaction.Query(`SELECT * 
+					FROM thread WHERE forumslug =  $1 ORDER BY created `, forumSlug)
 			}
 		}
 	}
@@ -408,11 +408,11 @@ func (thread *Thread) UpdateThread() error  {
 		}
 		thread.Id = actualId
 	}
-	rows := transaction.QueryRow("UPDATE thread SET message = coalesce(nullif($2, ''), message), title = coalesce(nullif($3, ''), title)" +
-		" WHERE id = $1 RETURNING slug, created, title, message, votes, forumslug, usernick ",  thread.Id, thread.Message, thread.Title)
+	rows := transaction.QueryRow(`UPDATE thread SET message = coalesce(nullif($2, ''), message), title = coalesce(nullif($3, ''), title) 
+		 WHERE id = $1 RETURNING slug, created, title, message, votes, forumslug, usernick `,  thread.Id, thread.Message, thread.Title)
 	err = rows.Scan(&thread.Slug, &thread.Date, &thread.Title, &thread.Message, &thread.Votes,  &thread.Forum, &thread.User)
 	if err != nil {
-		//log.Println(err)
+		log.Println(err)
 		err = transaction.Rollback()
 		if err != nil {
 			log.Fatalln(err)

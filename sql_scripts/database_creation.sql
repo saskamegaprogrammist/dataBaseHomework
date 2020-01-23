@@ -107,4 +107,4 @@ CREATE TABLE forum_user_new (
     forumslug citext NOT NULL
 );
 
-CREATE INDEX forum_user_forum_idx ON forum_user_new (usernick, forumslug);
+CREATE INDEX forum_forum_idx ON forum_user_new (forumslug);
