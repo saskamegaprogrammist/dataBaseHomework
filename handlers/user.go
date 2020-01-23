@@ -5,7 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/saskamegaprogrammist/dataBaseHomework/models"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
-	"log"
+	//"log"
 	"net/http"
 )
 

@@ -233,7 +233,7 @@ func GetPostsByThread(limit int, sinceStr string, desc bool, sort string, thread
 		err = rows.Scan(&postFound.Id, &postFound.Message, &postFound.Date, &postFound.Parent, &postFound.Edited, &postFound.User)
 		if err != nil {
 			//log.Println(err)
-			errRollback := transaction.Rollback()
+			//errRollback := transaction.Rollback()
 			if err != nil {
 				//log.Println(errRollback)
 			}

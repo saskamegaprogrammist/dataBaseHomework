@@ -3,7 +3,6 @@ package utils
 import (
 	"fmt"
 	"github.com/jackc/pgx"
-	"log"
 )
 
 var dataBasePool *pgx.ConnPool
