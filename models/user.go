@@ -32,19 +32,6 @@ func (user *User) CreateUser() ([]User, error) {
 		log.Println(err)
 	}
 
-
-			rows = transaction.QueryRow("SELECT current_database()::text")
-			if err != nil {
-				log.Println(err)
-			}
-
-				var name string
-
-			err = rows.Scan(&name)
-			if err != nil {
-				log.Println(err)
-			}
-
 	if userExists.Id != 0  {
 		usersExists = append(usersExists, userExists)
 	}

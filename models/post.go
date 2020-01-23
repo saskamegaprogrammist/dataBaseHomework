@@ -74,29 +74,29 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 				since, _ := strconv.Atoi(params.Since)
 				if params.Limit != -1 {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY created DESC ) as a ORDER BY id DESC LIMIT $3", thread.Id, since, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3", thread.Id, since, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY created ) as a ORDER BY id LIMIT $3 ", thread.Id, since, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 ", thread.Id, since, params.Limit)
 					}
 				} else {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  < $2 ORDER BY created DESC) as a ORDER BY id DESC ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  < $2 ORDER BY id DESC ", thread.Id, since)
 					} else {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY created) as a ORDER BY id ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY id ", thread.Id, since)
 					}
 				}
 			} else {
 				if params.Limit != -1 {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY created DESC) as a ORDER BY id DESC LIMIT $2", thread.Id, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id DESC LIMIT $2", thread.Id, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY created) as a ORDER BY id LIMIT $2", thread.Id, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id LIMIT $2", thread.Id, params.Limit)
 					}
 				} else {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY created DESC) as a ORDER BY id DESC", thread.Id)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id DESC", thread.Id)
 					} else {
-						rows, err = transaction.Query("SELECT * FROM (SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY created) as a ORDER BY id ", thread.Id)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id ", thread.Id)
 					}
 				}
 			}
@@ -106,19 +106,19 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 				since, _ := strconv.Atoi(params.Since)
 				if params.Limit != -1 {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT b.id, b.message, b.created, b.parent, b.isEdited, b.usernick FROM (SELECT id FROM post WHERE threadid = $1 AND array_length(path, 1) = 1 ORDER BY id DESC) as a "+
-						"LEFT JOIN (SELECT * FROM post WHERE path < (SELECT path FROM post WHERE id = $2) order by path DESC) as b ON ARRAY [a.id] &&  b.path::integer[] WHERE b.id is not null LIMIT $3 ", thread.Id, since, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
+						"WHERE threadid = $1 AND (path < (SELECT path FROM post WHERE id = $2)) ORDER BY path DESC LIMIT $3 ", thread.Id, since, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT b.id, b.message, b.created, b.parent, b.isEdited, b.usernick FROM (SELECT id FROM post WHERE threadid = $1 AND array_length(path, 1) = 1 ORDER BY id) as a "+
-							"LEFT JOIN (SELECT * FROM post WHERE path > (SELECT path FROM post WHERE id = $2) order by path) as b ON ARRAY [a.id] &&  b.path::integer[] WHERE b.id is not null LIMIT $3 ", thread.Id, since, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
+							"WHERE threadid = $1 AND (path > (SELECT path FROM post WHERE id = $2)) ORDER BY path LIMIT $3 ", thread.Id, since, params.Limit)
 					}
 				} else {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT b.id, b.message, b.created, b.parent, b.isEdited, b.usernick FROM (SELECT id FROM post WHERE threadid = $1 AND array_length(path, 1) = 1 ORDER BY id DESC) as a "+
-							"LEFT JOIN (SELECT * FROM post WHERE path < (SELECT path FROM post WHERE id = $2) order by path DESC) as b ON ARRAY [a.id] &&  b.path::integer[] WHERE b.id is not null ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
+							"WHERE threadid = $1 ORDER BY path DESC LIMIT $2 ", thread.Id, since, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT b.id, b.message, b.created, b.parent, b.isEdited, b.usernick FROM (SELECT id FROM post WHERE threadid = $1 AND array_length(path, 1) = 1 ORDER BY id) as a "+
-							"LEFT JOIN (SELECT * FROM post WHERE path > (SELECT path FROM post WHERE id = $2) order by path) as b ON ARRAY [a.id] &&  b.path::integer[] WHERE b.id is not null ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post "+
+							"WHERE threadid = $1 ORDER BY path LIMIT $2 ", thread.Id, since, params.Limit)
 					}
 				}
 			} else {
