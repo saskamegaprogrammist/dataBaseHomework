@@ -79,8 +79,7 @@ func (thread *Thread) CreateThread() (Thread, error) {
 		}
 		return threadExists, err
 	}
-	_, err = transaction.Exec("INSERT INTO forum_user_new (usernick, forumslug) SELECT $1, $2 WHERE NOT EXISTS" +
-		"(SELECT 1 FROM forum_user_new WHERE usernick = $1 AND forumslug = $2) ", thread.User, thread.Forum)
+	_, err = transaction.Exec("INSERT INTO forum_user_new VALUES ($1, $2) ", thread.User, thread.Forum)
 	if err != nil {
 		log.Println(err)
 		err = transaction.Rollback()
@@ -238,7 +237,9 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 	if len(newPosts) != 0 {
 		timeNow := time.Now()
 		vals := []interface{}{}
+		valsSec := []interface{}{}
 		query := "INSERT INTO post (usernick, forumslug, created, parent, message, threadid, path) VALUES"
+		querySec := "INSERT INTO forum_user_new VALUES"
 		for i:=0; i<len(newPosts); i++ {
 			var userId int
 			rows = transaction.QueryRow("SELECT id FROM forum_user WHERE nickname = $1", newPosts[i].User)
@@ -263,18 +264,8 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 					return newPosts, fmt.Errorf("Cannot insert post, parent doesnot exist"), 2
 				}
 			}
-
-			_, err = transaction.Exec("INSERT INTO forum_user_new (usernick, forumslug) SELECT $1, $2 WHERE NOT EXISTS " +
-				"(SELECT 1 FROM forum_user_new WHERE usernick = $1 AND forumslug = $2) ",  newPosts[i].User, forumSlug)
-			fmt.Println(newPosts[i].User, forumSlug)
-			if err != nil {
-				log.Println(err)
-				err = transaction.Rollback()
-				if err != nil {
-					log.Fatalln(err)
-				}
-				return newPosts, err, 2
-			}
+			querySec += " (?, ?),"
+			valsSec = append(valsSec, newPosts[i].User, forumSlug)
 
 			query += " (?, ?, ?, ?, ?, ?, (SELECT path FROM post WHERE id = ?) || (select nextval('post_id')::BIGINT)),"
 			vals = append(vals, newPosts[i].User, forumSlug, timeNow, newPosts[i].Parent, newPosts[i].Message, thread.Id, newPosts[i].Parent)
@@ -283,9 +274,16 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 		query = query[:len(query)-1]
 		query += " RETURNING id, isEdited, created";
 
+		querySec = querySec[:len(querySec)-1]
+
 		count := strings.Count(query, "?")
 		for k := 0; k < count; k++ {
 			query = strings.Replace(query, "?", "$"+strconv.Itoa(k+1), 1)
+		}
+
+		count = strings.Count(querySec, "?")
+		for k := 0; k < count; k++ {
+			querySec = strings.Replace(querySec, "?", "$"+strconv.Itoa(k+1), 1)
 		}
 
 		rowsMany, err := transaction.Query(query, vals...)
@@ -305,6 +303,15 @@ func (thread *Thread) CreatePosts(newPosts []Post) ([]Post,  error, int) {
 			newPosts[j].Thread = thread.Id
 			newPosts[j].Forum = thread.Forum
 			j++
+		}
+		_, err = transaction.Exec(querySec, valsSec...)
+		if err != nil {
+			log.Println(err)
+			err = transaction.Rollback()
+			if err != nil {
+				log.Fatalln(err)
+			}
+			return newPosts, err, 2
 		}
 		_, err = transaction.Exec("UPDATE forum SET posts = posts + $1 WHERE slug = $2 ",  len(newPosts), forumSlug)
 		if err != nil {

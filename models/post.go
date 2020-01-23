@@ -74,27 +74,27 @@ func GetPostsByThread(params utils.SearchParams, thread Thread) ([]Post, error) 
 					if params.Decs {
 						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC LIMIT $3", thread.Id, since, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 ", thread.Id, since, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id LIMIT $3 ", thread.Id, since, params.Limit)
 					}
 				} else {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  < $2 ORDER BY id DESC ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  < $2 ORDER BY id DESC ", thread.Id, since)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 and id  > $2 ORDER BY id ", thread.Id, since)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 and id  > $2 ORDER BY id ", thread.Id, since)
 					}
 				}
 			} else {
 				if params.Limit != -1 {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id DESC LIMIT $2", thread.Id, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC LIMIT $2", thread.Id, params.Limit)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id LIMIT $2", thread.Id, params.Limit)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post  WHERE threadid = $1 ORDER BY id LIMIT $2", thread.Id, params.Limit)
 					}
 				} else {
 					if params.Decs {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id DESC", thread.Id)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id DESC", thread.Id)
 					} else {
-						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post as a WHERE threadid = $1 ORDER BY id ", thread.Id)
+						rows, err = transaction.Query("SELECT id, message, created, parent, isEdited, usernick FROM post WHERE threadid = $1 ORDER BY id ", thread.Id)
 					}
 				}
 			}

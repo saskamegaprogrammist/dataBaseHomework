@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"log"
 )
@@ -95,7 +94,7 @@ func (db *DB) Clear() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("votes")
+	//fmt.Println("votes")
 	transaction, err = dataBase.Begin()
 	if err != nil {
 		log.Println(err)
@@ -118,7 +117,7 @@ func (db *DB) Clear() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("post")
+	//fmt.Println("post")
 	transaction, err = dataBase.Begin()
 	if err != nil {
 		log.Println(err)
@@ -141,7 +140,7 @@ func (db *DB) Clear() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("thread")
+	//fmt.Println("thread")
 	transaction, err = dataBase.Begin()
 	if err != nil {
 		log.Println(err)
@@ -164,7 +163,7 @@ func (db *DB) Clear() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("forum")
+	//fmt.Println("forum")
 	transaction, err = dataBase.Begin()
 	if err != nil {
 		log.Println(err)
@@ -187,6 +186,6 @@ func (db *DB) Clear() error {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	fmt.Println("forum_user")
+	//fmt.Println("forum_user")
 	return nil
 }

@@ -165,7 +165,7 @@ func GetUsersByForum(params utils.SearchParams, forumSlug string) ([]User, error
 	}
 
 	sqlSelect := "SELECT about, fullname, nickname, email FROM forum_user " +
-					"JOIN (SELECT usernick as merge_nick FROM forum_user_new " +
+					"JOIN (SELECT DISTINCT usernick as merge_nick FROM forum_user_new " +
 							"WHERE forumslug = $1 ) " +
 					"as u ON u.merge_nick = forum_user.nickname"
 	var rows *pgx.Rows
