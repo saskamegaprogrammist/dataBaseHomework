@@ -11,8 +11,7 @@ import (
 func AccessLogMiddleware (mux *mux.Router,) http.HandlerFunc   {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		mux.ServeHTTP(w, r)
-		rps.Add(1)
-
+		rps.Inc()
 	})
 }
 
@@ -34,12 +33,11 @@ func init() {
 
 func main() {
 
-	utils.CreateDataBaseConnection("alex", "alex", "95.163.251.171", "alex", 20);
+	utils.CreateDataBaseConnection("alex", "alex", "95.163.251.171", "alex", 20)
 	//utils.CreateDataBaseConnection("postgres", "1", "localhost", "project_techno_real", 20);
 	//utils.InitDataBase();
-
+	http.Handle("/metrics", promhttp.Handler())
 	r := mux.NewRouter()
-	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/api/user/{nickname}/create", handlers.CreateUser).Methods("POST")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.UpdateUser).Methods("POST")
