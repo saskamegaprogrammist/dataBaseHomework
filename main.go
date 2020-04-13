@@ -3,6 +3,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/saskamegaprogrammist/dataBaseHomework/handlers"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 )
@@ -10,11 +11,13 @@ import (
 
 
 func main() {
-	utils.CreateDataBaseConnection("docker", "docker", "localhost", "docker", 20)
+
+	utils.CreateDataBaseConnection("alex", "alex", "95.163.251.171", "alex", 20);
 	//utils.CreateDataBaseConnection("postgres", "1", "localhost", "project_techno_real", 20);
-	utils.InitDataBase()
+	//utils.InitDataBase();
 
 	r := mux.NewRouter()
+	r.Handle("/metrics", promhttp.Handler())
 	r.HandleFunc("/api/user/{nickname}/create", handlers.CreateUser).Methods("POST")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.GetUser).Methods("GET")
 	r.HandleFunc("/api/user/{nickname}/profile", handlers.UpdateUser).Methods("POST")

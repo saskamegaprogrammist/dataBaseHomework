@@ -9,8 +9,7 @@ require (
 	github.com/jackc/fake v0.0.0-20150926172116-812a484cc733 // indirect
 	github.com/jackc/pgx v3.6.0+incompatible
 	github.com/lib/pq v1.2.0 // indirect
-	github.com/mailru/easyjson v0.7.1
-	github.com/pkg/errors v0.8.1 // indirect
+	github.com/prometheus/client_golang v1.5.1
 	github.com/shopspring/decimal v0.0.0-20191130220710-360f2bc03045 // indirect
 	golang.org/x/crypto v0.0.0-20191206172530-e9b2fee46413 // indirect
 	golang.org/x/text v0.3.2 // indirect
