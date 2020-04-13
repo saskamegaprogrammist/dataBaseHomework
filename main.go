@@ -1,13 +1,35 @@
 package main
 import (
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/saskamegaprogrammist/dataBaseHomework/handlers"
 	"github.com/saskamegaprogrammist/dataBaseHomework/utils"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 )
+func AccessLogMiddleware (mux *mux.Router,) http.HandlerFunc   {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mux.ServeHTTP(w, r)
+		rps.Add(1)
 
+	})
+}
+
+var (
+
+	rps =prometheus.NewCounter(
+		prometheus.CounterOpts{
+			Name: "rps_total",
+		})
+)
+
+
+func init() {
+
+	prometheus.MustRegister(rps)
+
+}
 
 
 func main() {
@@ -40,6 +62,10 @@ func main() {
 
 	r.HandleFunc("/api/service/status", handlers.GetStatus).Methods("GET")
 	r.HandleFunc("/api/service/clear", handlers.Clear).Methods("POST")
+
+	siteHandler := AccessLogMiddleware(r)
+
+	http.Handle("/", siteHandler)
 
 	err := http.ListenAndServe(":5000", r)
 	if err != nil {
