@@ -65,7 +65,7 @@ func main() {
 
 	http.Handle("/", siteHandler)
 
-	err := http.ListenAndServe(":5000", r)
+	err := http.ListenAndServe(":5000", nil)
 	if err != nil {
 		log.Fatal(err)
 		return
